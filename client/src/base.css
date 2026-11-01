@@ -7,19 +7,19 @@
 
 @font-face {
   font-family: 'Google Sans';
-  src: url(/fonts/GoogleSans-Regular.ttf) format('truetype');
+  src: url(/fonts/GoogleSans-Regular.woff2) format('woff2');
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: 'Google Sans';
-  src: url(/fonts/GoogleSans-Medium.ttf) format('truetype');
+  src: url(/fonts/GoogleSans-Medium.woff2) format('woff2');
   font-weight: 500;
   font-display: swap;
 }
 @font-face {
   font-family: 'Google Sans';
-  src: url(/fonts/GoogleSans-Bold.ttf) format('truetype');
+  src: url(/fonts/GoogleSans-Bold.woff2) format('woff2');
   font-weight: 700;
   font-display: swap;
 }
@@ -59,6 +59,12 @@
   --accent: #1a73e8;
   --on-accent: #ffffff;
 
+  /* glass surfaces (theme aware) */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(30, 30, 30, 0.12);
+  --glass-solid: rgba(250, 250, 250, 0.94);
+  --glass-shadow: 0 8px 28px rgba(30, 30, 30, 0.1);
+
   --radius: 24px;
   --radius-sm: 14px;
   --stroke: 2px;
@@ -77,12 +83,17 @@
   --hairline: rgba(240, 240, 240, 0.14);
   --accent: var(--blue-ht);
   --on-accent: var(--black);
+  --glass-bg: rgba(10, 10, 10, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-solid: rgba(23, 23, 23, 0.92);
+  --glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
 /* --------------------------------------------------------------- base -- */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem; /* anchored sections never hide under the fixed bar */
 }
 body {
   margin: 0;
@@ -136,7 +147,8 @@ img {
 }
 
 .title-display {
-  font-size: clamp(2.4rem, 7vw, 4.75rem);
+  --hero-fs: clamp(2.4rem, 5.3vw, 4.3rem);
+  font-size: var(--hero-fs);
   line-height: 1.02;
   letter-spacing: -0.02em;
   font-weight: 400;
@@ -211,6 +223,7 @@ img {
 
 /* -------------------------------------------------------------- buttons -- */
 .btn {
+  touch-action: manipulation; /* no 300ms tap delay on phones */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -232,8 +245,9 @@ img {
   box-shadow: 3px 3px 0 var(--outline);
 }
 .btn:active:not(:disabled) {
-  transform: none;
+  transform: scale(0.95);
   box-shadow: none;
+  transition-duration: 0.1s;
 }
 .btn:disabled {
   opacity: 0.55;
@@ -244,7 +258,7 @@ img {
   color: var(--bg);
 }
 .btn-ghost {
-  background: transparent;
+  background: var(--surface);
   color: var(--ink);
 }
 .btn-light {
@@ -277,7 +291,8 @@ img {
 .band .btn-light {
   color: var(--black);
 }
-.band .btn-light {
+.band .btn-light,
+.band .btn-ghost {
   background: #fff;
 }
 .band-ink .btn-light {
@@ -572,12 +587,13 @@ textarea.field {
 }
 
 /* ================================================================ motion ==== */
-@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+/* transform only: text is visible immediately (good for LCP) and the motion stays on the GPU compositor */
+@keyframes rise { from { transform: translate3d(0, 18px, 0); } to { transform: none; } }
 .rise { animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0s); }
 
 @keyframes word-in {
-  from { opacity: 0; transform: translateY(55%) rotate(4deg); filter: blur(8px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  from { opacity: 0; transform: translate3d(0, 40%, 0); }
+  to { opacity: 1; transform: none; }
 }
 .word-in { animation: word-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
@@ -590,7 +606,6 @@ textarea.field {
 .spin-slow { animation: spin 26s linear infinite; }
 .spin-slower { animation: spin 60s linear infinite reverse; }
 
-@keyframes marquee { to { transform: translateX(-50%); } }
 .marquee { display: flex; width: max-content; animation: marquee var(--t, 45s) linear infinite; }
 .marquee.rev { animation-direction: reverse; }
 .marquee-wrap:hover .marquee { animation-play-state: paused; }
@@ -618,3 +633,122 @@ textarea.field {
 .spin-fast { animation: spin-fast 0.8s linear infinite; }
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+
+/* ============================================================ glass + perf === */
+/* Glass surfaces: full blur on desktop; on phones a high-opacity solid fill, because stacked
+   backdrop-filter layers are what tank frame rates on mid-range GPUs. */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+.glass-bar {
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+@media (max-width: 767px) {
+  .glass,
+  .glass-bar,
+  .glass-badge {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--glass-solid);
+  }
+}
+
+/* Floating metric badges */
+.glass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transform: rotate(var(--r, 0deg));
+}
+@keyframes badge-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--r, 0deg)); }
+  50% { transform: translate3d(0, -7px, 0) rotate(var(--r, 0deg)); }
+}
+.float-badge { animation: badge-float 5.5s ease-in-out infinite; animation-delay: var(--d, 0s); will-change: transform; }
+.badge-cloud { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+@media (min-width: 1024px) {
+  /* positioned in em of the headline size, so badges sit in the gaps beside the lines at any width */
+  .badge-cloud { display: block; position: absolute; inset: 0; pointer-events: none; --u: clamp(2.4rem, 5.3vw, 4.3rem); }
+  .badge-cloud > * { position: absolute; pointer-events: auto; }
+}
+
+/* Marquee: pure CSS, runs on the compositor (transform only, own layer, no layout work) */
+@keyframes marquee { to { transform: translate3d(-50%, 0, 0); } }
+.marquee { will-change: transform; backface-visibility: hidden; }
+
+/* Hero: every animation that is not essential is switched off on phones */
+@media (max-width: 767px) {
+  .stack-card > .float-y,
+  .stack-card > .float-r,
+  .hero-extras .float-y,
+  .hero-extras .float-r,
+  .hero-extras .spin-slow,
+  .hero-extras .spin-slower { animation: none; }
+  .stack-card { will-change: auto; }
+}
+
+/* Static background for phones: dot grid + one warm lamp-light, zero JS and zero GPU work */
+.static-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 45% at 50% 0%, rgba(249, 171, 0, 0.07), transparent 72%),
+    radial-gradient(circle, color-mix(in srgb, var(--ink) 16%, transparent) 1px, transparent 1.4px) 0 0 / 22px 22px;
+}
+
+/* Hero glow: a single warm light, like a lamp over a late-night study table. It sits behind the
+   photo collage (right) and fades into the headline, so the people are what feels lit. */
+.ambient {
+  position: absolute;
+  inset: -20% -30% -20% 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 50% at 92% 48%, rgba(249, 171, 0, 0.16), rgba(234, 67, 53, 0.07) 55%, transparent 78%);
+}
+
+/* Border beam on the hero CTAs: a Google-coloured conic ring that spins while hovered */
+@property --beam { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes beam { to { --beam: 360deg; } }
+.btn-beam { position: relative; isolation: isolate; }
+.btn-beam::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from var(--beam), var(--blue), var(--red), var(--yellow), var(--green), var(--blue));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+@media (hover: hover) {
+  .btn-beam:hover::before { opacity: 1; animation: beam 2.4s linear infinite; }
+}
+.btn-beam:active::before { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .float-badge, .btn-beam::before { animation: none !important; }
+}
+
+@media (min-width: 1024px) { .lg\:hero-min { min-height: calc(100vh - 9rem); min-height: calc(100svh - 9rem); } }

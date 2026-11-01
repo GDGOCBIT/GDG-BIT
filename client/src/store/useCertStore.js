@@ -1,7 +1,5 @@
 import { create } from 'zustand'
-import crypto from 'crypto-js'
-
-const SECRET_KEY = import.meta.env.VITE_SECRET_KEY
+import { decrypt } from '../utils/api'
 
 export const useCertStore = create(set => ({
   certLoading: true,
@@ -29,13 +27,9 @@ export const useCertStore = create(set => ({
 
       await fetch(`/api/cert/verify/${certificateID}`, config)
         .then(response => response.json())
-        .then(result => {
+        .then(async result => {
           if (result.success === true) {
-            const decryptedData = JSON.parse(
-              crypto.AES.decrypt(result.data, SECRET_KEY).toString(
-                crypto.enc.Utf8
-              )
-            )
+            const decryptedData = await decrypt(result.data)
             useCertStore.getState().setCertData({
               _id: decryptedData._id,
               fullName: decryptedData.fullName,

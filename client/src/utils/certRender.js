@@ -16,11 +16,25 @@ export const loadImage = src =>
 export const makeQr = async url =>
   loadImage(await QRCode.toDataURL(url || 'https://gdg.community.dev', { margin: 1, width: 700, errorCorrectionLevel: 'M' }))
 
-export const loadFonts = fields =>
-  Promise.all(
+// Fonts used by certificates (designer, verify page, legacy templates) are not needed anywhere else,
+// so they are fetched only when a certificate is drawn.
+const CERT_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Island+Moments&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&display=swap'
+export const ensureCertFonts = () => {
+  if (document.getElementById('cert-fonts')) return
+  const l = document.createElement('link')
+  l.id = 'cert-fonts'
+  l.rel = 'stylesheet'
+  l.href = CERT_FONTS_URL
+  document.head.appendChild(l)
+}
+
+export const loadFonts = fields => {
+  ensureCertFonts()
+  return Promise.all(
     [...new Set(fields.filter(f => f.type !== 'qr').map(f => `${f.weight || 400} 40px "${f.font || 'Google Sans'}"`))]
       .map(spec => document.fonts.load(spec, 'Aa').catch(() => {}))
   )
+}
 
 export const newField = (type, over = {}) => ({
   id: Math.random().toString(36).slice(2, 9),

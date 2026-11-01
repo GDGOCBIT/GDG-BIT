@@ -8,6 +8,7 @@ import Core24 from './Template/Core24'
 import CustomCertificate from './CustomCertificate'
 import EmptyState from '../../components/EmptyState'
 import { BraceTag } from '../../components/Brand'
+import { ensureCertFonts } from '../../utils/certRender'
 
 const TEMPLATES = {
   'Google Cloud Study Jam': GoogleCloud,
@@ -21,6 +22,7 @@ const VerifyCertificate = () => {
   const { certLoading, certData, fetchCertData } = useCertStore()
 
   useEffect(() => {
+    ensureCertFonts()
     if (certificateID) fetchCertData(certificateID)
   }, [certificateID])
 

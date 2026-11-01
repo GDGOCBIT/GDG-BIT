@@ -2,6 +2,7 @@ import useApi from '../utils/useApi'
 import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
 import { formatDate } from '../utils/api'
+import { sized } from '../utils/images'
 
 const COLORS = ['var(--blue)', 'var(--red)', 'var(--yellow)', 'var(--green)']
 
@@ -39,7 +40,7 @@ export default function Archive () {
                     <li key={e._id}>
                       <a href={e.link} target='_blank' rel='noreferrer' className='card lift flex items-center gap-4 p-3 pr-5'>
                         {e.image?.url ? (
-                          <img src={e.image.url} alt='' loading='lazy' className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[var(--outline)] shrink-0' />
+                          <img src={sized(e.image.url, 160)} alt='' width='80' height='80' loading='lazy' decoding='async' className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-[var(--outline)] shrink-0' />
                         ) : (
                           <span className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-[var(--outline)] shrink-0' style={{ background: COLORS[yi % 4] }} />
                         )}

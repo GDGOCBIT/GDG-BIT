@@ -38,7 +38,7 @@ export default function Profile () {
     const res = await api('/profile', { method: 'PUT', body: form, auth: true })
     setSaving(false)
     if (res.success) {
-      setUser(decrypt(res.data).user)
+      setUser((await decrypt(res.data)).user)
       setFile(null)
       toast.success(res.msg)
     } else toast.error(res.msg)

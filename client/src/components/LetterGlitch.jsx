@@ -191,6 +191,7 @@ const LetterGlitch = ({
   interactive = true,
   cursorRadius = 140,
   repel = 0,
+  maxFps = 60,
   clickEffect = 'tear',
   flow = 0.5,
   edgeFade = 0,
@@ -222,6 +223,7 @@ const LetterGlitch = ({
     interactive,
     cursorRadius: Math.max(0, cursorRadius),
     repel: clamp(repel, 0, 1),
+    maxFps: clamp(maxFps, 5, 120),
     clickEffect,
     flow: clamp(flow, 0, 1),
     edgeFade: clamp(edgeFade, 0, 0.5),
@@ -759,10 +761,16 @@ const LetterGlitch = ({
       if (!pending) introLeft = false;
     };
 
+    let lastDraw = 0;
     const frame = now => {
       raf = 0;
       if (!visible || document.hidden) return;
       const s = settingsRef.current;
+      // Frame cap: letters glitch fine at ~20-24 fps, and that saves most of the GPU/CPU work on phones and
+      // small laptops. Stay smoother (40+) only while the cursor is actively pushing letters around.
+      const cap = pointer.presence > 0.02 ? Math.max(s.maxFps, 40) : s.maxFps;
+      if (lastDraw && now - lastDraw < 1000 / cap - 1) { raf = requestAnimationFrame(frame); return; }
+      lastDraw = now;
       const dt = last ? clamp((now - last) / 1000, 0.0005, 0.05) : 1 / 60;
       last = now;
       clock += dt;

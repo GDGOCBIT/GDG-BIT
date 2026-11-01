@@ -8,9 +8,9 @@ let inflight = null
 const listeners = new Set()
 const fallback = { socials: socialLinks.map(s => ({ key: s.text.toLowerCase(), label: s.text, icon: s.icon, url: s.link })), members: 0 }
 
-const load = () => {
+const load = (fresh = false) => {
   if (!inflight) {
-    inflight = api('/settings').then(r => {
+    inflight = api(fresh ? '/settings?fresh=1' : '/settings').then(r => {
       cache = r.success ? { socials: r.socials, members: r.members } : fallback
       listeners.forEach(fn => fn(cache))
       return cache
@@ -19,7 +19,7 @@ const load = () => {
   return inflight
 }
 
-export const refreshSettings = () => { inflight = null; return load() }
+export const refreshSettings = () => { inflight = null; return load(true) }
 
 /** { socials: [{key,label,icon,url}], members } — falls back to built-in links if the API is unreachable. */
 export default function useSettings () {

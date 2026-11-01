@@ -3,6 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: -10;
+  opacity: 0.5; /* tone the letter field down so it stays a backdrop */
   pointer-events: none;
   overflow: hidden;
 }

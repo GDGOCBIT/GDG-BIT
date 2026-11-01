@@ -19,14 +19,21 @@ export default function GalleryStrip () {
   const loop = [...strip, ...strip] // doubled so the strip can wrap around seamlessly
 
   // One animation loop: slow drift + eased arrow slides, both based on elapsed time (not frame rate).
+  // The position is kept in a float of our own: browsers round scrollLeft to whole pixels, so adding a
+  // fraction per frame and reading it back never moves on a fast display.
   const anim = useRef(null)
+  const pos = useRef(0)
+  const [paused, setPaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const pausedRef = useRef(paused)
+  pausedRef.current = paused
   useEffect(() => {
     const el = scroller.current
     if (!el || strip.length < 2) return undefined
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let raf = 0
     let last = performance.now()
     let hovering = false
+    let written = el.scrollLeft
+    pos.current = el.scrollLeft
     const pause = (ms = 2500) => { pausedUntil.current = Date.now() + ms }
     const enter = () => { hovering = true }
     const leave = () => { hovering = false }
@@ -36,19 +43,22 @@ export default function GalleryStrip () {
       last = now
       const half = el.scrollWidth / 2
       if (half > 0) {
+        // somebody else moved it (finger, wheel, scrollbar): continue from where it is now
+        if (Math.abs(el.scrollLeft - written) > 2) pos.current = el.scrollLeft
         const a = anim.current
         if (a) {
           const t = Math.min(1, (now - a.start) / a.dur)
-          const e = 1 - Math.pow(1 - t, 3) // ease-out
-          el.scrollLeft = a.from + (a.to - a.from) * e
+          pos.current = a.from + (a.to - a.from) * (1 - Math.pow(1 - t, 3))
           if (t >= 1) anim.current = null
-        } else if (!reduced && !hovering && Date.now() > pausedUntil.current) {
-          el.scrollLeft += 42 * dt // about 42px per second
+        } else if (!pausedRef.current && !hovering && Date.now() > pausedUntil.current) {
+          pos.current += 42 * dt // about 42px per second
         }
-        if (el.scrollLeft >= half) { // both copies look identical, so jump back by exactly one copy
-          el.scrollLeft -= half
+        if (pos.current >= half) { // both copies look identical, so jump back by exactly one copy
+          pos.current -= half
           if (anim.current) { anim.current.from -= half; anim.current.to -= half }
         }
+        el.scrollLeft = pos.current
+        written = el.scrollLeft
       }
       raf = requestAnimationFrame(tick)
     }
@@ -70,10 +80,11 @@ export default function GalleryStrip () {
     pausedUntil.current = Date.now() + 5000
     const half = el.scrollWidth / 2
     const w = el.clientWidth
-    let from = anim.current ? anim.current.to : el.scrollLeft
+    let from = anim.current ? anim.current.to : pos.current
     if (dir < 0 && from < w) from += half // start in the second copy so there is room to go back
-    el.scrollLeft = anim.current ? el.scrollLeft + (from - anim.current.to) : from
-    anim.current = { from: el.scrollLeft, to: from + dir * Math.min(w * 0.8, 640), start: performance.now(), dur: 550 }
+    pos.current = anim.current ? pos.current + (from - anim.current.to) : from
+    el.scrollLeft = pos.current
+    anim.current = { from: pos.current, to: from + dir * Math.min(w * 0.8, 640), start: performance.now(), dur: 550 }
   }
 
   if (!loading && !items.length) return null
@@ -86,6 +97,7 @@ export default function GalleryStrip () {
           <h2 className='title-1'>Moments we <b>keep building</b></h2>
         </div>
         <div className='flex items-center gap-2 self-start sm:self-auto'>
+          <button className='btn btn-ghost btn-icon' aria-label={paused ? 'Play the gallery' : 'Pause the gallery'} aria-pressed={paused} onClick={() => setPaused(p => !p)}>{paused ? '▶' : '❚❚'}</button>
           <button className='btn btn-ghost btn-icon' aria-label='Scroll gallery left' onClick={() => slide(-1)}>←</button>
           <button className='btn btn-ghost btn-icon' aria-label='Scroll gallery right' onClick={() => slide(1)}>→</button>
           <Link to='/gallery' className='btn btn-ghost'>Open the gallery <Arrow width={26} /></Link>

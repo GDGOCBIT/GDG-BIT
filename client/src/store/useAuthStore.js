@@ -1,8 +1,6 @@
 import { create } from 'zustand'
 import { toast } from 'sonner'
-import crypto from 'crypto-js'
-
-const SECRET_KEY = import.meta.env.VITE_SECRET_KEY
+import { decrypt } from '../utils/api'
 
 export const useAuthStore = create(set => ({
   user: null,
@@ -228,13 +226,9 @@ export const useLoginStore = create((set, get) => ({
       }
       await fetch(`/api/load-user`, config)
         .then(response => response.json())
-        .then(result => {
+        .then(async result => {
           if (result.success === true) {
-            const decryptedData = JSON.parse(
-              crypto.AES.decrypt(result.data, SECRET_KEY).toString(
-                crypto.enc.Utf8
-              )
-            )
+            const decryptedData = await decrypt(result.data)
             useAuthStore.getState().setUser(decryptedData.user)
             useAuthStore.getState().setVerifyLoading(false)
             useAuthStore.getState().setVerifySuccess(true)

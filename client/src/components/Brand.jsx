@@ -9,10 +9,10 @@ export const COMMUNITY_URL =
 export function Logo ({ compact = false, className = '' }) {
   return (
     <Link to='/' className={`flex items-center shrink-0 ${className}`} aria-label='Google Developer Groups on Campus, Bengal Institute of Technology. Home'>
-      <img src='/brand/gdg-mark-256.png' alt='' className={`h-9 w-auto ${compact ? 'sm:hidden' : 'hidden'}`} />
+      <img src='/brand/gdg-mark-256.png' alt='' width='36' height='36' className={`h-9 w-auto ${compact ? 'sm:hidden' : 'hidden'}`} />
       <span className={compact ? 'max-sm:hidden' : ''}>
-        <img src='/brand/gdg-horizontal-light.png' alt='' className='logo-light h-9 w-auto' />
-        <img src='/brand/gdg-horizontal-dark.png' alt='' className='logo-dark h-9 w-auto' />
+        <img src='/brand/gdg-horizontal-light.png' alt='' width='1684' height='214' className='logo-light h-9 w-auto' />
+        <img src='/brand/gdg-horizontal-dark.png' alt='' width='1684' height='213' className='logo-dark h-9 w-auto' />
       </span>
     </Link>
   )

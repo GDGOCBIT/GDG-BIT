@@ -4,9 +4,9 @@ import EventGrid from '../components/EventGrid'
 import { StatusPill } from '../components/EventCard'
 import { formatDate, formatTime } from '../utils/api'
 import useSettings from '../utils/useSettings'
+import { sized } from '../utils/images'
 import { Arrow, COMMUNITY_URL, Dots, Globe, Waves } from '../components/Brand'
-import Hero from '../components/Hero'
-import Marquee from '../components/Marquee'
+import { FaDiscord, FaGithub, FaInstagram, FaLinkedinIn, FaXTwitter } from 'react-icons/fa6'
 import GalleryStrip from '../components/GalleryStrip'
 
 const sortForHome = items => {
@@ -20,13 +20,14 @@ const sortForHome = items => {
   )
 }
 
+const CHAPTER_FOUNDED = 2023
+
 function Stats ({ events, team, members }) {
-  const first = events.length ? new Date(Math.min(...events.map(e => new Date(e.startDate)))).getFullYear() : null
   const stats = [
     { n: events.length || '—', label: 'events hosted', c: 'var(--blue-pa)' },
     { n: members ? members.toLocaleString('en-IN') : '—', label: 'chapter members', c: 'var(--red-pa)' },
     { n: team || '—', label: 'organizers & leads', c: 'var(--yellow-pa)' },
-    { n: first || '—', label: 'running since', c: 'var(--green-pa)' }
+    { n: CHAPTER_FOUNDED, label: 'running since', c: 'var(--green-pa)' }
   ]
   return (
     <section className='wrap py-10'>
@@ -49,7 +50,7 @@ function Spotlight ({ event }) {
     <section className='wrap py-10'>
       <div className='band band-yellow overflow-hidden grid md:grid-cols-[1fr_1.3fr]'>
         {event.image?.url && (
-          <img src={event.image.url} alt='' className='w-full h-64 md:h-full object-cover border-b-2 md:border-b-0 md:border-r-2 border-[var(--black)]' />
+          <img src={sized(event.image.url, 900)} alt='' width='900' height='900' loading='lazy' decoding='async' className='w-full h-64 md:h-full object-cover border-b-2 md:border-b-0 md:border-r-2 border-[var(--black)]' />
         )}
         <div className='p-6 sm:p-10 flex flex-col gap-4 justify-center'>
           <div className='flex flex-wrap items-center gap-3'>
@@ -146,6 +147,14 @@ function JoinBand () {
   )
 }
 
+const SOCIAL_ICONS = {
+  instagram: [FaInstagram, '#e4405f'],
+  linkedin: [FaLinkedinIn, '#0a66c2'],
+  github: [FaGithub, '#181717'],
+  discord: [FaDiscord, '#5865f2'],
+  x: [FaXTwitter, '#000000']
+}
+
 function Socials () {
   const { socials } = useSettings()
   return (
@@ -158,7 +167,9 @@ function Socials () {
         {socials.map(s => (
           <a key={s.key} href={s.url} target='_blank' rel='noreferrer' className='card lift p-4 sm:p-5 flex flex-col items-center gap-3'>
             <span className='w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border-2 border-[var(--outline)] flex items-center justify-center'>
-              <img src={s.icon} alt='' className='w-7 h-7 sm:w-8 sm:h-8 object-contain' />
+              {SOCIAL_ICONS[s.key]
+                ? (() => { const [Icon, color] = SOCIAL_ICONS[s.key]; return <Icon className='w-6 h-6 sm:w-7 sm:h-7' style={{ color }} aria-hidden='true' /> })()
+                : <img src={s.icon} alt='' className='w-7 h-7 sm:w-8 sm:h-8 object-contain' />}
             </span>
             <span className='text-sm font-medium'>{s.label}</span>
           </a>
@@ -168,18 +179,13 @@ function Socials () {
   )
 }
 
-export default function Home () {
-  const { members } = useSettings()
-  const { items: events, loading, error } = useApi('/events')
-  const { items: team } = useApi('/team')
+export default function HomeBelow ({ events, team, members, loading, error }) {
   const sorted = sortForHome(events)
   const spotlight = sorted[0]
   const recent = sorted.slice(1, 4)
 
   return (
     <>
-      <Hero events={events} team={team.length} members={members} />
-      <Marquee />
       <Spotlight event={spotlight} />
       <section className='wrap py-10'>
         <div className='flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8'>

@@ -44,7 +44,7 @@ export default function Team () {
               {groups[g].map((m, i) => (
                 <article key={m._id} className='card lift flex flex-col'>
                   <div className='aspect-square border-b-2 border-[var(--outline)] overflow-hidden' style={{ background: TONES[(gi + i) % 4] }}>
-                    <img src={m.image?.url || '/user.svg'} alt={m.name} loading='lazy' className='w-full h-full object-cover' />
+                    <img src={m.image?.url || '/user.svg'} alt={m.name} loading='lazy' decoding='async' width='300' height='300' className='w-full h-full object-cover' />
                   </div>
                   <div className='p-4 flex flex-col gap-2 flex-1'>
                     <p className='font-medium leading-snug'>{m.name}</p>

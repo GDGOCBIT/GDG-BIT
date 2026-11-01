@@ -6,7 +6,7 @@ import { compressPhoto } from '../../utils/imageCompress'
 import EmptyState from '../../components/EmptyState'
 
 export default function AdminGallery () {
-  const { items, loading, error, reload } = useApi('/gallery')
+  const { items, loading, error, reload } = useApi('/gallery?fresh=1')
   const [event, setEvent] = useState('')
   const [progress, setProgress] = useState('')
   const [over, setOver] = useState(false)

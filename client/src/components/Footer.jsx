@@ -9,7 +9,7 @@ export default function Footer () {
     <footer className='mt-20 bg-[var(--black)] text-[var(--offwhite)]'>
       <div className='wrap py-12 grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]'>
         <div className='flex flex-col gap-4'>
-          <img src='/brand/gdg-horizontal-dark.png' alt='Google Developer Groups on Campus, Bengal Institute of Technology' className='h-11 w-auto self-start' />
+          <img src='/brand/gdg-horizontal-dark.png' alt='Google Developer Groups on Campus, Bengal Institute of Technology' width='1684' height='213' loading='lazy' className='h-11 w-auto self-start' />
           <p className='text-sm text-[#b5b5b5] max-w-sm'>
             A student-led community at BIT Kolkata for learning Google technologies, building
             together and growing as developers.
