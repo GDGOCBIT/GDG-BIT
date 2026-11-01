@@ -37,10 +37,16 @@ swatches, off-white `#f0f0f0` / black `#1e1e1e`, thick ink outlines, globe / dot
       every section, certificates, profile, sign out/in, forgot password, theme, API security)
 - [x] Screenshots of every page at 1366px and 390px, light + dark
 
-## Before deploying
-- [ ] Add `ADMIN_EMAILS` (and optionally `SESSION_SECRET`) to the Vercel environment variables
-- [ ] Rebuild `client/dist` (`npm run build`) right before committing — Vercel serves the committed build
-- [ ] Rotate the MongoDB password and Gmail app password (they were shared in chat)
+## Deployed
+- [x] Live at https://gdsc-bit.vercel.app (Vercel project `gdsc-bit`, team `gdg-bit`)
+- [x] Production env: `FRONTEND_URL` / `BACKEND_URL` / `PUBLIC_URL` = `https://gdsc-bit.vercel.app`, `ADMIN_EMAILS` set
+- [ ] Register the OAuth callback URLs below with Google / LinkedIn / X
+- [ ] Rotate the MongoDB password and Gmail app password (they were shared in chat), then update them in Vercel
+
+OAuth callbacks to allow:
+- `https://gdsc-bit.vercel.app/api/auth/google/callback`
+- `https://gdsc-bit.vercel.app/api/auth/linkedin/callback`
+- `https://gdsc-bit.vercel.app/api/auth/twitter/callback`
 
 ## Not done / ideas
 - Image uploads in admin (Cloudinary) were not exercised by the automated test, to avoid writing to the real Cloudinary account — try one manually
