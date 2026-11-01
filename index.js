@@ -1,3 +1,4 @@
+require('./api/utils/nodeCompat.js');
 const express = require('express');
 require('dotenv').config();
 const bodyParser = require('body-parser');
@@ -14,12 +15,12 @@ const app = express();
 app.use(express.json({ limit: '25mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(bodyParser.json({ limit: '50mb' }));
-app.use(cors());
+app.use(cors({ origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL].filter(Boolean) }));
 
 app.use(session({
     resave: false,
     saveUninitialized: true,
-    secret: 'SECRET'
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET
 }));
 
 app.use(passport.initialize());

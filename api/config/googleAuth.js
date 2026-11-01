@@ -11,12 +11,10 @@ passport.use(
       callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(profile)
       try {
         let user = await User.findOne({
           $or: [{ email: profile.emails[0].value }, { googleId: profile.id }],
         })
-        console.log(user)
         if (!user) {
           const imageUpload = await cloudinary.v2.uploader.upload(
             profile.photos[0].value,

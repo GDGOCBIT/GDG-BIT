@@ -1,94 +1,55 @@
 const User = require("../models/userModel.js");
 const JWT = require("jsonwebtoken");
 
-const isLoginToken = async (req, res, next) => {
-    const loginToken = req.headers["login_token"];
+const fail = (res, msg, status = 401) =>
+    res.status(status).json({ success: false, msg });
 
-    if (!loginToken) {
-        return res.status(400).json({
-            success: false,
-            msg: "Session expired... Try again!",
-        });
-    }
+// Builds a middleware that validates a token sent in `header`, stored on the user as `field`.
+const tokenGuard = (header, field, { requireVerified = false, select = "" } = {}) =>
+    async (req, res, next) => {
+        try {
+            const token = req.headers[header];
+            if (!token) return fail(res, "Session expired... Try again!");
 
-    const checkToken = await User.findOne({ jwtLoginToken: loginToken });
+            let payload;
+            try {
+                payload = JWT.verify(token, process.env.JWT_SECRET);
+            } catch (e) {
+                return fail(res, "Session expired... Try again!");
+            }
 
-    if (checkToken === null) {
-        return res.status(400).json({
-            success: false,
-            msg: "Invalid Token!",
-        });
-    }
+            const user = await User.findOne({ _id: payload.userId, [field]: token }).select(select);
+            if (!user) return fail(res, "Invalid Token!");
 
-    const payload = JWT.verify(loginToken, process.env.JWT_SECRET);
+            if (requireVerified && !user.isVerified) {
+                return fail(res, "You are not authorized to perform this action!", 403);
+            }
 
-    req.user = await User.findById(payload.userId);
-    if (!req.user.isVerified) {
-        return res.status(400).json({
-            success: false,
-            msg: "You are not authorized to perform this action!",
-        });
-    }
+            req.user = user;
+            next();
+        } catch (error) {
+            console.log(error);
+            fail(res, "Something went wrong... Try again later!", 500);
+        }
+    };
 
+const isLoginToken = tokenGuard("login_token", "jwtLoginToken", { requireVerified: true });
+const isRegisterToken = tokenGuard("register_token", "jwtRegisterToken", { select: "+registerOTP +otpCreatedAt" });
+const isForgotToken = tokenGuard("forgot_token", "jwtForgotToken", { requireVerified: true });
+
+// Admins are users with role "admin" or whose email is listed in ADMIN_EMAILS (comma separated).
+const adminEmails = () =>
+    (process.env.ADMIN_EMAILS || "")
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+
+const userIsAdmin = (user) =>
+    !!user && (user.role === "admin" || adminEmails().includes((user.email || "").toLowerCase()));
+
+const isAdmin = (req, res, next) => {
+    if (!userIsAdmin(req.user)) return fail(res, "Admin access required!", 403);
     next();
 };
 
-const isRegisterToken = async (req, res, next) => {
-    const registerToken = req.headers["register_token"];
-
-    if (!registerToken) {
-        return res.status(400).json({
-            success: false,
-            msg: "Session expired... Try again!",
-        });
-    }
-
-    const checkToken = await User.findOne({ jwtRegisterToken: registerToken });
-
-    if (checkToken === null) {
-        return res.status(400).json({
-            success: false,
-            msg: "Invalid Token!",
-        });
-    }
-
-    const payload = JWT.verify(registerToken, process.env.JWT_SECRET);
-
-    req.user = await User.findById(payload.userId);
-
-    next();
-};
-
-const isForgotToken = async (req, res, next) => {
-    const forgotToken = req.headers["forgot_token"];
-
-    if (!forgotToken) {
-        return res.status(400).json({
-            success: false,
-            msg: "Session expired... Try again!",
-        });
-    }
-
-    const checkToken = await User.findOne({ jwtForgotToken: forgotToken });
-
-    if (checkToken === null) {
-        return res.status(400).json({
-            success: false,
-            msg: "Invalid Token!",
-        });
-    }
-
-    const payload = JWT.verify(forgotToken, process.env.JWT_SECRET);
-
-    req.user = await User.findById(payload.userId);
-    if (!req.user.isVerified) {
-        return res.status(400).json({
-            success: false,
-            msg: "You are not authorized to perform this action!",
-        });
-    }
-
-    next();
-};
-
-module.exports = { isLoginToken, isRegisterToken, isForgotToken };
+module.exports = { isLoginToken, isRegisterToken, isForgotToken, isAdmin, userIsAdmin };

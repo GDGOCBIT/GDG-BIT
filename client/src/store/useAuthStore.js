@@ -365,7 +365,7 @@ export const useForgotStore = create(set => ({
           }
 
           if (result.success === false) {
-            toast.success(result.msg, { duration: 7500 })
+            toast.error(result.msg, { duration: 7500 })
           }
         })
         .finally(() => {

@@ -5,6 +5,7 @@ const sendOTP = require('../mail/sendOTP.js');
 const getDataUrl = require('../middleware/dataURL.js');
 const { v2 } = require('cloudinary');
 const CryptoJS = require('crypto-js');
+const { userIsAdmin } = require('../middleware/auth.js');
 
 exports.userRegisterCredential = async (req, res) => {
     try {
@@ -243,7 +244,17 @@ exports.userLogin = async (req, res) => {
 exports.loadUser = async (req, res) => {
     try {
         const encryptedData = CryptoJS.AES.encrypt(
-            JSON.stringify({ user: req.user }),
+            JSON.stringify({
+                user: {
+                    _id: req.user._id,
+                    firstName: req.user.firstName,
+                    lastName: req.user.lastName,
+                    email: req.user.email,
+                    avatar: req.user.avatar,
+                    joinedOn: req.user.joinedOn,
+                    isAdmin: userIsAdmin(req.user),
+                }
+            }),
             process.env.DATA_ENCRYPTION_SECRET_KEY
         ).toString();
 
@@ -339,7 +350,15 @@ exports.forgotOTPVerify = async (req, res) => {
         const otp = req.headers["otp"];
         const email = req.headers["email"];
 
-        const user = await User.findOne({ email }).where({ isVerified: true });
+        const user = await User.findOne({ email })
+            .select("+forgotOTP +otpCreatedAt")
+            .where({ isVerified: true });
+        if (!user || !user.forgotOTP) {
+            return res.status(400).json({
+                success: false,
+                msg: "Invalid request... Try again!",
+            });
+        }
 
         const otpCreatedAt = new Date(user.otpCreatedAt);
         const currentTime = new Date();
