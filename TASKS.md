@@ -25,6 +25,7 @@ swatches, off-white `#f0f0f0` / black `#1e1e1e`, thick ink outlines, globe / dot
 - [x] Auth redesigned (social + email, OTP with paste support, forgot password)
 - [x] Admin dashboard restyled; admin now has Overview / Certificates / Projects (events + team come from GDG automatically)
 - [x] **Certificate designer**: upload blank template → drag name / QR / ID / extra CSV-column text into place (font, size, colour, align, shrink-to-fit) → upload recipients CSV → ZIP of PNG or PDF certificates + `issued.csv`; every certificate gets its own QR to its verify page
+- [x] **Admin users**: Admins tab to grant/revoke admin by email (owners in `ADMIN_EMAILS` are protected; people can be invited before they sign up)
 - [x] **Hero** rebuilt: rotating colour headline, pointer-reactive poster stack, spinning badge, live countdown to the next event, tech marquee
 - [x] **Gallery**: public page with lightbox + home film strip; admin tab uploads photos (compressed in-browser, stored in MongoDB); event posters fill in automatically
 - [x] **Background**: WebGL letter glitch in the 4 GDG colours; letters are pushed away by the cursor
