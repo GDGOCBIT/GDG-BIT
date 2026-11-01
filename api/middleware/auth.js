@@ -37,19 +37,34 @@ const isLoginToken = tokenGuard("login_token", "jwtLoginToken", { requireVerifie
 const isRegisterToken = tokenGuard("register_token", "jwtRegisterToken", { select: "+registerOTP +otpCreatedAt" });
 const isForgotToken = tokenGuard("forgot_token", "jwtForgotToken", { requireVerified: true });
 
-// Admins are users with role "admin" or whose email is listed in ADMIN_EMAILS (comma separated).
-const adminEmails = () =>
+// Admin = role "admin", an owner listed in ADMIN_EMAILS (cannot be removed from the website),
+// or an email that was granted admin from the dashboard before the person signed up.
+const ownerEmails = () =>
     (process.env.ADMIN_EMAILS || "")
         .split(",")
         .map((e) => e.trim().toLowerCase())
         .filter(Boolean);
 
-const userIsAdmin = (user) =>
-    !!user && (user.role === "admin" || adminEmails().includes((user.email || "").toLowerCase()));
+const isOwnerEmail = (email) => ownerEmails().includes(String(email || "").toLowerCase());
 
-const isAdmin = (req, res, next) => {
-    if (!userIsAdmin(req.user)) return fail(res, "Admin access required!", 403);
-    next();
+const userIsAdmin = async (user) => {
+    if (!user) return false;
+    if (user.role === "admin" || isOwnerEmail(user.email)) return true;
+    const email = String(user.email || "").toLowerCase();
+    if (!email) return false;
+    const Settings = require("../models/settingsModel.js");
+    const doc = await Settings.findOne({ key: "site" }).select("adminEmails");
+    return !!doc && doc.adminEmails.includes(email);
 };
 
-module.exports = { isLoginToken, isRegisterToken, isForgotToken, isAdmin, userIsAdmin };
+const isAdmin = async (req, res, next) => {
+    try {
+        if (!(await userIsAdmin(req.user))) return fail(res, "Admin access required!", 403);
+        next();
+    } catch (error) {
+        console.log(error);
+        fail(res, "Something went wrong... Try again later!", 500);
+    }
+};
+
+module.exports = { isLoginToken, isRegisterToken, isForgotToken, isAdmin, userIsAdmin, isOwnerEmail, ownerEmails };

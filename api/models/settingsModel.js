@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const SettingsSchema = mongoose.Schema({
     key: { type: String, default: 'site', unique: true },
     socials: { type: Map, of: String, default: {} },   // platform key -> url ('' hides the link)
+    adminEmails: { type: [String], default: [] },     // emails granted admin before they have an account
     membersOverride: { type: Number, default: null },  // null = use the live count from gdg.community.dev
 });
 

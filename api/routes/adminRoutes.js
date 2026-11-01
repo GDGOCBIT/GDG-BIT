@@ -5,6 +5,7 @@ const singleUpload = require("../middleware/multer.js");
 const galleryUpload = require("../middleware/galleryUpload.js");
 const gallery = require("../controllers/galleryController.js");
 const settings = require("../controllers/settingsController.js");
+const admins = require("../controllers/adminUsersController.js");
 
 const router = express.Router();
 router.use("/admin", isLoginToken, isAdmin);
@@ -25,6 +26,9 @@ router.post("/admin/certs/bulk", c.bulkCerts);
 router.put("/admin/certs/:id", c.updateCert);
 router.delete("/admin/certs/:id", c.deleteCert);
 
+router.get("/admin/admins", admins.list);
+router.post("/admin/admins", admins.add);
+router.delete("/admin/admins/:email", admins.remove);
 router.get("/admin/settings", settings.adminSettings);
 router.put("/admin/settings", settings.saveSettings);
 router.post("/admin/gallery", galleryUpload, gallery.create);

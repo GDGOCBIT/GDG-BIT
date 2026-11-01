@@ -252,7 +252,7 @@ exports.loadUser = async (req, res) => {
                     email: req.user.email,
                     avatar: req.user.avatar,
                     joinedOn: req.user.joinedOn,
-                    isAdmin: userIsAdmin(req.user),
+                    isAdmin: await userIsAdmin(req.user),
                 }
             }),
             process.env.DATA_ENCRYPTION_SECRET_KEY

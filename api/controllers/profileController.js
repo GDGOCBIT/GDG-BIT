@@ -23,7 +23,7 @@ exports.updateProfile = async (req, res) => {
                     email: user.email,
                     avatar: user.avatar,
                     joinedOn: user.joinedOn,
-                    isAdmin: userIsAdmin(user),
+                    isAdmin: await userIsAdmin(user),
                 },
             }),
             process.env.DATA_ENCRYPTION_SECRET_KEY
