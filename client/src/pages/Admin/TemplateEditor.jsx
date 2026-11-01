@@ -258,7 +258,7 @@ export default function TemplateEditor ({ template, onClose, onSaved }) {
                   const f = e.target.files[0]
                   e.target.value = ''
                   if (!f) return
-                  if (f.size > 10 * 1024 * 1024) return toast.error('That image is over 10 MB. Export a smaller one (2000–3000px wide is plenty).')
+                  if (f.size > 4 * 1024 * 1024) return toast.error('That image is over 4 MB. Export a smaller one (2000–3000px wide is plenty).')
                   setFile(f)
                   setImgSrc(URL.createObjectURL(f))
                 }} />
@@ -297,7 +297,7 @@ export default function TemplateEditor ({ template, onClose, onSaved }) {
           {!bg && !imgError ? (
             <div className='band band-blue p-10 text-center flex flex-col items-center gap-3'>
               <p className='text-xl font-medium'>Start with your blank certificate</p>
-              <p className='text-[var(--muted)] max-w-md'>Upload a PNG / JPG / WebP (up to 10 MB) with empty space where the name and QR code should go. 2000–3000px wide is plenty.</p>
+              <p className='text-[var(--muted)] max-w-md'>Upload a PNG / JPG / WebP (up to 4 MB) with empty space where the name and QR code should go. 2000–3000px wide is plenty.</p>
             </div>
           ) : bg && (
             <div className='card p-2 sm:p-3 !overflow-auto bg-[var(--sunken)] max-h-[80vh]'>

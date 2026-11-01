@@ -128,8 +128,8 @@ exports.saveTemplate = async (req, res) => {
             if (!/^image\/(png|jpeg|webp)$/.test(req.file.mimetype)) {
                 return res.status(400).json({ success: false, msg: 'Use a PNG, JPG or WebP image!' });
             }
-            if (req.file.size > 10 * 1024 * 1024) {
-                return res.status(400).json({ success: false, msg: 'Image is over 10 MB. Export a smaller one (2000-3000px wide is plenty)!' });
+            if (req.file.size > 4 * 1024 * 1024) {
+                return res.status(400).json({ success: false, msg: 'Image is over 4 MB. Export a smaller one (2000-3000px wide is plenty)!' });
             }
         }
 

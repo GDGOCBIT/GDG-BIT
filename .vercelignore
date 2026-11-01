@@ -1,0 +1,11 @@
+# Keep the upload small: only what the server needs at runtime.
+node_modules
+client/node_modules
+client/src
+client/public
+python
+.git
+.env
+.env.*
+.vercel
+TASKS.md
