@@ -613,3 +613,8 @@ textarea.field {
   .rise, .word-in, .float-y, .float-r, .spin-slow, .spin-slower, .marquee { animation: none !important; }
   .stack-card { transition: none; }
 }
+
+@keyframes spin-fast { to { transform: rotate(360deg); } }
+.spin-fast { animation: spin-fast 0.8s linear infinite; }
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
