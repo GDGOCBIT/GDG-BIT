@@ -1,5 +1,6 @@
 require('./api/utils/nodeCompat.js');
 const express = require('express');
+const compression = require('compression');
 require('dotenv').config();
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -11,6 +12,8 @@ const path = require('path');
 const connectDatabase = require('./api/config/connectDatabase.js');
 
 const app = express();
+app.disable('x-powered-by');
+app.use(compression()); // gzip/brotli-class compression for HTML, JSON and JS
 
 app.use(express.json({ limit: '25mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -42,16 +45,22 @@ app.get('/api', (req, res) => {
 });
 
 // Frontend Routes
-app.use(express.static(path.resolve(__dirname, 'client', 'dist')))
+// Caching: hashed build files never change (cache for a year), fonts/images for a month, and the HTML
+// is always revalidated so a new deploy is picked up immediately (the CDN may keep it for an hour).
+const dist = path.resolve(__dirname, 'client', 'dist');
+app.use(express.static(dist, {
+    index: false,
+    setHeaders(res, file) {
+        if (/[\\/]assets[\\/]/.test(file)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        else if (/\.(woff2|png|jpe?g|webp|avif|svg|ico)$/i.test(file)) res.setHeader('Cache-Control', 'public, max-age=2592000');
+        else res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+    },
+}));
 app.get('*', (req, res) => {
-    res.sendFile(
-        path.resolve(__dirname, 'client', 'dist', 'index.html'),
-        function (err) {
-            if (err) {
-                res.status(500).send(err)
-            }
-        }
-    )
+    res.set('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
+    res.sendFile(path.join(dist, 'index.html'), (err) => {
+        if (err) res.status(500).send(err);
+    });
 });
 
 const PORT = process.env.PORT || 5000;

@@ -1,10 +1,14 @@
 const GalleryItem = require('../models/galleryModel.js');
 const { serverError } = require('../utils/crudFactory.js');
+const sharp = require('sharp');
+
+// Widths the site is allowed to ask for (anything else is rounded up to the next one).
+const WIDTHS = [240, 480, 720, 1200, 1600];
 
 const OK_TYPES = /^image\/(jpeg|png|webp)$/;
 const view = (g) => ({
     _id: g._id, title: g.title, caption: g.caption, event: g.event, width: g.width, height: g.height, createdAt: g.createdAt,
-    url: `/api/gallery/${g._id}/image`, thumbUrl: `/api/gallery/${g._id}/image?size=thumb`,
+    url: `/api/gallery/${g._id}/image?w=1400`, thumbUrl: `/api/gallery/${g._id}/image?w=480`,
 });
 
 // ---- public
@@ -15,13 +19,31 @@ exports.list = async (req, res) => {
     } catch (e) { serverError(res, e); }
 };
 
+// Serves a photo at the size it will be shown (?w=480) and as WebP when the browser supports it.
+// Responses are immutable and CDN-cacheable, so each size is only ever generated once.
 exports.image = async (req, res) => {
     try {
         const g = await GalleryItem.findById(req.params.id).select('+image +thumb mime');
         if (!g) return res.status(404).end();
+        const want = parseInt(req.query.w, 10);
+        const forever = 'public, max-age=31536000, s-maxage=31536000, immutable';
+
+        if (want > 0) {
+            const w = WIDTHS.find((x) => x >= want) || WIDTHS[WIDTHS.length - 1];
+            const src = w <= 700 && g.thumb?.length ? g.thumb : g.image;
+            if (!src?.length) return res.status(404).end();
+            const webp = /image\/webp/.test(req.headers.accept || '');
+            try {
+                const out = await sharp(src).rotate().resize({ width: w, withoutEnlargement: true })
+                    [webp ? 'webp' : 'jpeg'](webp ? { quality: 76 } : { quality: 80, mozjpeg: true }).toBuffer();
+                res.set({ 'Content-Type': webp ? 'image/webp' : 'image/jpeg', 'Cache-Control': forever, Vary: 'Accept' });
+                return res.send(out);
+            } catch (e) { /* fall through to the stored original */ }
+        }
+
         const buf = req.query.size === 'thumb' && g.thumb?.length ? g.thumb : g.image;
         if (!buf?.length) return res.status(404).end();
-        res.set({ 'Content-Type': g.mime || 'image/jpeg', 'Cache-Control': 'public, max-age=31536000, immutable' });
+        res.set({ 'Content-Type': g.mime || 'image/jpeg', 'Cache-Control': forever });
         res.send(buf);
     } catch (e) { res.status(404).end(); }
 };
