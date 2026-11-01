@@ -1,89 +1,59 @@
 import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useCertStore } from '../../store/useCertStore'
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
 import GoogleCloud from './Template/GoogleCloud'
 import GenAI24 from './Template/GenAI24'
 import GoogleCloudFacilitator from './Template/GoogleCloudFacilitator'
 import Core24 from './Template/Core24'
-import { Footer } from '../../components'
+import CustomCertificate from './CustomCertificate'
+import EmptyState from '../../components/EmptyState'
+import { BraceTag } from '../../components/Brand'
 
-// Main Component
+const TEMPLATES = {
+  'Google Cloud Study Jam': GoogleCloud,
+  'Google Gen AI Study Jam 2024': GenAI24,
+  'Core Team 24': Core24,
+  'Google Cloud Study Jam Facilitator': GoogleCloudFacilitator
+}
+
 const VerifyCertificate = () => {
   const { certificateID } = useParams()
   const { certLoading, certData, fetchCertData } = useCertStore()
+
   useEffect(() => {
     if (certificateID) fetchCertData(certificateID)
   }, [certificateID])
+
+  const Template = certData.template ? CustomCertificate : TEMPLATES[certData.certificate]
+
   return (
-    <div className='cert-main-container'>
-      <div className='cert-aspect-box'>
-        <div className='cert-aspect-centering'>
-          {certLoading ? (
-            // Fetching Certificate
-            <>
-              <div className='relative w-[400px] h-[300px] md:w-[625px] md:h-[426px] lg:w-[950px] lg:h-[652px] border rounded'>
-                <Skeleton className='absolute -z-10 -top-[4px] left-0 w-full h-full' />
-                <div className='absolute top-0 left-0 w-full h-full flex items-center justify-center z-50 text-xl font-extrabold'>
-                  <div className='w-[97.5px]'>Validating</div>
-                  <div className='w-[20px] loader-dot' />
-                </div>
-              </div>
-              <div className='flex flex-col gap-3 items-center'>
-                <div className='flex items-center gap-3 flex-row sm:gap-5'>
-                  <div className='rounded-2xl overflow-hidden w-[150px] h-[35px]'>
-                    <Skeleton className='w-full p-4 h-full' />
-                  </div>
-                  <div className='rounded-2xl overflow-hidden w-[150px] h-[35px]'>
-                    <Skeleton className='w-full p-4 h-full' />
-                  </div>
-                </div>
-                <div className='rounded-2xl overflow-hidden w-[150px] h-[35px]'>
-                  <Skeleton className='w-full p-4 h-full' />
-                </div>
-              </div>
-            </>
-          ) : certData.message ? (
-            // Error fetching Certificate
-            <div className='relative bg-white w-[400px] h-[300px] md:w-[625px] md:h-[426px] lg:w-[950px] lg:h-[652px] border rounded text-xl font-extrabold'>
-              <p className='absolute top-0 left-0 w-full h-full flex items-center justify-center z-50 text-[#4A90F4] text-xl font-extrabold'>
-                {certData.message}
-              </p>
-            </div>
-          ) : certData.certificate === 'Google Cloud Study Jam' ? (
-            <GoogleCloud />
-          ) : certData.certificate === 'Google Gen AI Study Jam 2024' ? (
-            <GenAI24 />
-          ) : certData.certificate === 'Core Team 24' ? (
-            <Core24 />
-          ) : (
-            certData.certificate === 'Google Cloud Study Jam Facilitator' && (
-              <GoogleCloudFacilitator />
-            )
-          )}
+    <section className='wrap page-top'>
+      <div className='flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8'>
+        <div>
+          <BraceTag>Certificate</BraceTag>
+          <h1 className='title-1 mt-2'>
+            {certLoading ? 'Verifying…' : certData.message ? 'Not verified' : <>Verified <b>certificate</b></>}
+          </h1>
         </div>
+        <span className='pill self-start sm:self-auto'>ID · {certificateID}</span>
       </div>
-      <div className='gdsc-strip-logo'>
-        <div className='px-4 sm:py-[5px] sm:px-[50px] flex flex-col sm:flex-row items-center gap-2'>
-          <img
-            src='/gdsc_original.png'
-            className='md:w-[66.67px] md:h-[32.27px] w-12 h-6'
-            alt='our gdsc logo'
-          />
-          <div className='chapter'>
-            <p className='community-name'>Google Developer Student Clubs</p>
-            <p className='chapter-name'>Bengal Institute of Technology</p>
-          </div>
+
+      {certLoading ? (
+        <div className='card aspect-[16/9] skeleton max-w-[950px] mx-auto' />
+      ) : certData.message ? (
+        <EmptyState tone='red' title={certData.message}
+          text='Check that the link or ID is exactly as printed on the certificate. If it still fails, contact an organizer.'>
+          <Link to='/' className='btn btn-ink btn-sm'>Go home</Link>
+        </EmptyState>
+      ) : Template ? (
+        <div className='cert-stage'>
+          <div className='pill pill-upcoming mb-6'>✓ Issued to {certData.fullName} by GDG on Campus BIT</div>
+          <Template />
         </div>
-        <div className='footer-color-strip'>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-      </div>
-    </div>
+      ) : (
+        <EmptyState title='Unknown certificate type' text={`“${certData.certificate}” has no template yet.`} />
+      )}
+    </section>
   )
 }
 

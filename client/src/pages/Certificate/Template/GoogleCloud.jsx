@@ -16,7 +16,7 @@ const GoogleCloud = () => {
 
   return (
     <>
-      <div className='relative w-[400px] h-[300px] md:w-[625px] md:h-[426px] lg:w-[950px] lg:h-[652px] border shadow flex flex-col items-center justify-center'>
+      <div className='cert-fixed relative w-[400px] h-[300px] md:w-[625px] md:h-[426px] lg:w-[950px] lg:h-[652px] border-2 border-[var(--outline)] rounded-xl overflow-hidden bg-white flex flex-col items-center justify-center'>
         <img
           src='/cloudCertificate.png'
           className='w-full h-full'
@@ -36,11 +36,11 @@ const GoogleCloud = () => {
           alt='Skill Boost QR'
         />
       </div>
-      <div className='flex flex-col py-12 gap-3 items-center'>
+      <div className='flex flex-col py-10 gap-3 items-center'>
         <div className='flex items-center justify-center gap-3 flex-wrap flex-row sm:gap-5'>
           <a
             href={`https://twitter.com/intent/tweet?text=I%20just%20earned%20the%20${certData.certificate}%20Certificate!%20Check%20it%20out%20here:%20${certData.verifyURL}`}
-            className='rounded-2xl hover:border-gray-300 hover:border-2 w-[150px] h-[35px] bg-black hover:bg-white text-white hover:text-black duration-200 font-extrabold flex items-center justify-center'
+            className='btn btn-ink btn-sm'
           >
             Share on X
           </a>
@@ -49,7 +49,7 @@ const GoogleCloud = () => {
               rel='noreferrer'
               target='_blank'
               href={`https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${certData.certificate}&organizationId=97886448&issueYear=2023&issueMonth=10&certUrl=${certData.verifyURL}&certId=${certData._id}`}
-              className='rounded-2xl w-[150px] h-[35px] hover:border-gray-300 hover:border-2 bg-[#0072b1] hover:bg-white text-white hover:text-[#0072b1] duration-200 font-extrabold flex items-center justify-center'
+              className='btn btn-blue btn-sm'
             >
               Add to LinkedIn
             </a>
@@ -62,7 +62,7 @@ const GoogleCloud = () => {
           {({ blob, url, loading, error }) => (
             <button
               disabled={loading}
-              className='rounded-2xl w-[150px] h-[35px] hover:border-gray-300 hover:border-2 bg-[#FFBC39] hover:bg-white text-white hover:text-[#FFBC39] duration-200 font-extrabold flex items-center justify-center'
+              className='btn btn-light btn-sm'
             >
               {loading ? 'Wait...' : 'Download'}
             </button>

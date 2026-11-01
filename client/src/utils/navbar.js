@@ -1,27 +1,7 @@
 export const navData = [
-    {
-        id: 0,
-        name: "Events",
-        link: "#"
-    },
-    {
-        id: 1,
-        name: "Team",
-        link: "#"
-    },
-    {
-        id: 2,
-        name: "Projects",
-        link: "#"
-    },
-    {
-        id: 3,
-        name: "Specials",
-        link: "#"
-    },
-    {
-        id: 4,
-        name: "Archive",
-        link: "#"
-    },
-];
+  { id: 0, name: 'Events', link: '/events' },
+  { id: 1, name: 'Gallery', link: '/gallery' },
+  { id: 2, name: 'Team', link: '/team' },
+  { id: 3, name: 'Projects', link: '/projects' },
+  { id: 4, name: 'Archive', link: '/archive' }
+]

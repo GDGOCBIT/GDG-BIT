@@ -44,7 +44,9 @@ export const useCertStore = create(set => ({
               skillBoostQR: decryptedData.skillBoostQR,
               certificate: decryptedData.certificate,
               message: '',
-              appreciation: decryptedData.appreciation
+              appreciation: decryptedData.appreciation,
+              template: decryptedData.template || null,
+              values: decryptedData.values || null
             })
           }
 

@@ -1,160 +1,174 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import useWindowDimension from '../utils/useWindowDimension'
-import { navData } from '../utils/navbar'
-import { useAuthStore, useLoginStore } from '../store/useAuthStore'
-import { useAnimStore } from '../store/useAnimStore'
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import MobileMenu from './MobileMenu'
+import { navData } from '../utils/navbar'
+import { useAuthStore } from '../store/useAuthStore'
+import ThemeToggle from './ThemeToggle'
+import { Logo } from './Brand'
 
 export const Navbar = () => {
-  const { width } = useWindowDimension()
-  const { verifyLoading, verifySuccess, user } = useAuthStore()
-  const { userLogout } = useLoginStore()
-  const [timeoutID, setTimeoutId] = useState(null)
-  const [menuAnimation, setMenuAnimation] = useState('')
-  const [avatarAnimation, setAvatarAnimation] = useState('')
-  const { mobileMenu, setMobileMenu, avatarMenu, setAvatarMenu } =
-    useAnimStore()
-
-  function handleMenuToggle () {
-    if (timeoutID) clearTimeout(timeoutID)
-    if (menuAnimation === 'active') {
-      setMenuAnimation('')
-      const id = setTimeout(() => {
-        setMobileMenu(false)
-      }, 400)
-      setTimeoutId(id)
-    } else {
-      setMenuAnimation('active')
-      setMobileMenu(true)
-    }
-  }
-
-  function handleAuthAction (e) {
-    const { name } = e.target
-    if (name === 'signout') {
-      userLogout()
-      handleAvatarToggle()
-      handleMenuToggle()
-    } else {
-      toast.info('we are working on it.')
-    }
-  }
-  function handleAvatarToggle (e) {
-    if (width > 640 && user) {
-      console.log('called avatar menu')
-      if (timeoutID) clearTimeout(timeoutID)
-      if (avatarAnimation === 'active') {
-        setAvatarAnimation('')
-        const id = setTimeout(() => {
-          setAvatarMenu(false)
-        }, 400)
-        setTimeoutId(id)
-      } else {
-        setAvatarMenu(true)
-        const id = setTimeout(() => {
-          setAvatarAnimation('active')
-        }, 1)
-        setTimeoutId(id)
-      }
-    }
-  }
+  const { verifyLoading, user, setUser, setVerifySuccess } = useAuthStore()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const avatarRef = useRef(null)
 
   useEffect(() => {
-    if (width > 640) {
-      setMenuAnimation('')
-      setAvatarAnimation('')
-      setMobileMenu(false)
-      setAvatarMenu(false)
+    setMenuOpen(false)
+    setAvatarOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    const onDown = e => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target)) setAvatarOpen(false)
     }
-  }, [width])
+    const onKey = e => {
+      if (e.key === 'Escape') {
+        setAvatarOpen(false)
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+  }, [menuOpen])
+
+  const signOut = () => {
+    localStorage.removeItem('login_token')
+    setUser(null)
+    setVerifySuccess(false)
+    toast.success('Signed out')
+    navigate('/')
+  }
+
+  const linkClass = ({ isActive }) =>
+    `px-4 py-2 rounded-full text-[0.95rem] font-medium transition-colors ${
+      isActive ? 'bg-[var(--ink)] text-[var(--bg)]' : 'hover:bg-[var(--sunken)]'
+    }`
 
   return (
-    <div className='Navbar-container'>
-      <div
-        className={`navbar-inner-cont ${
-          menuAnimation === 'active' ? 'expanded' : ''
-        }`}
-      >
-        <div className='Navbar-flex-container'>
-          <Link to='/' className='Navbar-logo'>
-            <img src='/logo-crop.png' alt='logo' />
-          </Link>
-          <div className='Navbar-links'>
+    <header className='fixed top-0 inset-x-0 z-50 pt-3'>
+      <div className='wrap'>
+        <nav
+          className={`h-16 pl-4 pr-2 flex items-center justify-between gap-2 rounded-full border-2 transition-all ${
+            scrolled || menuOpen
+              ? 'bg-[var(--surface)] border-[var(--outline)] shadow-[4px_4px_0_var(--outline)]'
+              : 'bg-[var(--surface)] border-[var(--hairline)]'
+          }`}
+        >
+          <Logo compact />
+
+          <div className='hidden lg:flex items-center gap-1'>
             {navData.map(item => (
-              <Link to={item.link} className='Navbar-link' key={item.id}>
-                <span>{item.name}</span>
-                <div className='Navbar-link-highlight' />
-              </Link>
+              <NavLink key={item.id} to={item.link} className={linkClass}>
+                {item.name}
+              </NavLink>
             ))}
           </div>
-          <div className='Navbar-auth'>
-            {verifyLoading ? (
-              <div className='relative w-[40px] h-[40px] rounded-full  overflow-hidden'>
-                <Skeleton className='absolute -top-1 left-0 right-0 bottom-0 w-full h-full' />
-              </div>
+
+          <div className='flex items-center gap-1.5'>
+            <ThemeToggle />
+            {verifyLoading && !user ? (
+              <div className='w-11 h-11 rounded-full skeleton' />
             ) : !user ? (
-              <Link to='/auth' className='Navbar-signin-button'>
+              <Link to='/auth' className='btn btn-ink btn-sm max-sm:hidden'>
                 Sign in
               </Link>
             ) : (
-              user && (
-                <div
-                  className={`w-[40px] h-[40px] rounded-full border border-[#3c82f6] bg-white overflow-hidden ${
-                    !mobileMenu ? 'cursor-pointer' : ''
-                  }`}
-                  onClick={() => handleAvatarToggle()}
+              <div className='relative' ref={avatarRef}>
+                <button
+                  onClick={() => setAvatarOpen(o => !o)}
+                  aria-label='Account menu'
+                  aria-expanded={avatarOpen}
+                  className='w-11 h-11 rounded-full border-2 border-[var(--outline)] overflow-hidden bg-[var(--sunken)] block'
                 >
-                  <img
-                    src={user?.avatar?.url ? user.avatar.url : '/user.svg'}
-                    className='w-full h-full object-contain'
-                  />
-                </div>
-              )
+                  <img src={user?.avatar?.url || '/user.svg'} alt='' className='w-full h-full object-cover' />
+                </button>
+                {avatarOpen && (
+                  <div className='absolute right-0 mt-3 w-64 card p-2 flex flex-col shadow-[4px_4px_0_var(--outline)]'>
+                    <div className='px-3 py-2.5 mb-1 border-b border-[var(--hairline)]'>
+                      <p className='font-medium truncate'>
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className='text-xs text-[var(--muted)] truncate'>{user.email}</p>
+                    </div>
+                    <Link to='/profile' className='px-3 py-2 rounded-xl hover:bg-[var(--sunken)]'>
+                      Your profile
+                    </Link>
+                    {user.isAdmin && (
+                      <Link to='/admin' className='px-3 py-2 rounded-xl hover:bg-[var(--sunken)]'>
+                        Admin dashboard
+                      </Link>
+                    )}
+                    <button onClick={signOut} className='px-3 py-2 rounded-xl hover:bg-[var(--sunken)] text-left' style={{ color: 'var(--red)' }}>
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
-            {/* Mobile Menu toggler */}
 
             <button
-              className='Navbar-menu-toggler'
-              onClick={() => handleMenuToggle()}
-              title='Click to open menu'
+              className='lg:hidden btn btn-ghost btn-icon'
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
             >
-              <div className={`Navbar-menu-bar-container ${menuAnimation}`}>
-                <div
-                  className={`Navbar-menu-toggler-top arrow-bar ${menuAnimation}`}
-                ></div>
-                <div
-                  className={`Navbar-menu-toggler-bottom ${menuAnimation} arrow-bar`}
-                ></div>
-              </div>
+              <svg width='22' height='22' viewBox='0 0 24 24' stroke='currentColor' strokeWidth='2' strokeLinecap='round' fill='none'>
+                {menuOpen ? <path d='M6 6l12 12M18 6L6 18' /> : <path d='M4 8h16M4 16h16' />}
+              </svg>
             </button>
+          </div>
+        </nav>
+      </div>
+
+      {menuOpen && (
+        <div className='lg:hidden fixed inset-x-0 top-[5.25rem] bottom-0 bg-[var(--bg)] overflow-y-auto'>
+          <div className='wrap py-6 flex flex-col gap-2'>
+            {[{ id: 'home', name: 'Home', link: '/' }, ...navData].map((item, i) => (
+              <NavLink
+                key={item.id}
+                to={item.link}
+                end={item.link === '/'}
+                className={({ isActive }) =>
+                  `flex items-center justify-between text-3xl py-3 border-b-2 border-[var(--hairline)] ${isActive ? 'font-bold' : ''}`
+                }
+              >
+                {item.name}
+                <span className='w-4 h-4 rounded-full border-2 border-[var(--outline)]'
+                  style={{ background: ['var(--blue)', 'var(--red)', 'var(--yellow)', 'var(--green)', 'var(--blue)'][i] }} />
+              </NavLink>
+            ))}
+            {!user ? (
+              <Link to='/auth' className='btn btn-ink mt-6'>
+                Sign in
+              </Link>
+            ) : (
+              <div className='flex flex-col gap-2 mt-6'>
+                <Link to='/profile' className='btn btn-ghost'>Your profile</Link>
+                {user.isAdmin && <Link to='/admin' className='btn btn-ghost'>Admin dashboard</Link>}
+                <button onClick={signOut} className='btn btn-danger'>Sign out</button>
+              </div>
+            )}
           </div>
         </div>
-        {/* If there is a user and clicked on profile img */}
-        {avatarMenu && (
-          <div className={`avatar-menu ${avatarAnimation}`}>
-            <button name='signout' onClick={handleAuthAction}>
-              Sign out
-            </button>
-            <div />
-            <button name='profile' onClick={handleAuthAction}>
-              Profile
-            </button>
-          </div>
-        )}
-
-        {/* Experiment with nav */}
-        {mobileMenu && (
-          <MobileMenu
-            navData={navData}
-            user={user}
-            onAuthClick={handleAuthAction}
-          />
-        )}
-      </div>
-    </div>
+      )}
+    </header>
   )
 }

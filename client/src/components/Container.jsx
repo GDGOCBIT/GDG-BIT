@@ -1,26 +1,26 @@
-import { Navbar } from './Navbar'
 import { useLocation } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import MobileMenu from './MobileMenu'
-import AvatarMenu from './AvatarMenu'
-import { useAnimStore } from '../store/useAnimStore'
-import { navData } from '../utils/navbar'
+import { Navbar } from './Navbar'
+import Footer from './Footer'
+import { useThemeStore } from '../store/useThemeStore'
+import GlitchBackground from './GlitchBackground'
 
+// Page shell: navbar + content + footer (the auth page is full-screen on its own).
 const Container = ({ children }) => {
-  const location = useLocation()
-  const { menuPopup, avatarPopup } = useAnimStore()
+  const { pathname } = useLocation()
+  const theme = useThemeStore(s => s.theme)
+  const bare = pathname === '/auth'
 
   return (
     <>
-      <Toaster className='hidden sm:block' richColors duration={5000} position='top-center' />
-      <Toaster className='block sm:hidden' richColors duration={5000} position='bottom-center' />
-      <div className='global-container'>
-        {location.pathname !== '/auth' && <Navbar />}
-        <div className='w-full h-full fixed -z-10 top-0 left-0 right-0 bg-gradient-to-b from-[#FFBC39] to-[#FFF]' />
-        <div>{children}</div>
-        {/* {menuPopup && <MobileMenu menuLinks={navData} />}
-        {avatarPopup && <AvatarMenu />} */}
-      </div>
+      <Toaster theme={theme} richColors closeButton duration={5000} position='top-center' />
+      <a href='#main' className='sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] btn btn-ink btn-sm'>
+        Skip to content
+      </a>
+      {!bare && <GlitchBackground />}
+      {!bare && <Navbar />}
+      <main id='main' className='min-h-[70vh] overflow-x-clip'>{children}</main>
+      {!bare && <Footer />}
     </>
   )
 }
