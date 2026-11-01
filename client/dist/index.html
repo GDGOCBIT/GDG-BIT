@@ -26,14 +26,16 @@
   <link rel="icon" type="image/png" href="/brand/favicon.png">
   <link rel="apple-touch-icon" href="/brand/gdg-mark-256.png">
 
+  <!-- Brand font: Latin-subset WOFF2 (11 KB each). Preload the two weights used above the fold. -->
+  <link rel="preload" href="/fonts/GoogleSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/GoogleSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Google Sans Code (brand secondary typeface) + fonts used by the certificate templates -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400;500&family=Roboto+Mono:wght@400;500&family=Caveat:wght@400..700&family=Island+Moments&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500&display=swap"
-    rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-B8oSi3Ow.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DUscJk_K.css">
+  <!-- Mono font for the terminal and labels. Non-blocking: the page renders first, the font swaps in. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400;500&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400;500&display=swap"></noscript>
+  <script type="module" crossorigin src="/assets/index-CQL5KRVE.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C7Zmu2EE.css">
 </head>
 
 <body>
