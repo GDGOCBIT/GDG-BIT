@@ -14,10 +14,24 @@ A complete solution for handling everything about our **GDSC** for its members a
 
 ## Features
 
-- An awesome design from our Graphics team.
-- Look for events, projects, and archives.
-- User specific details.
-- Certificate verification with share options.
+- Designed to the official **GDG On Campus brand guide**, with a light / dark theme switch and mobile-first layouts.
+- **Events, team and projects stay up to date automatically**: events and organizers are synced from our
+  [GDG community page](https://gdg.community.dev/gdg-on-campus-bengal-institute-of-technology-kolkata-india/),
+  projects from the [GDGOCBIT GitHub org](https://github.com/GDGOCBIT).
+- **Admin dashboard** (`/admin`) to add events, team members, projects and certificates (with CSV import).
+  Admins are the emails listed in `ADMIN_EMAILS`.
+- Member accounts: email + OTP sign-up, Google / LinkedIn / X sign-in, profile editing.
+- Certificate verification with share and download options.
+
+## Running locally
+
+```bash
+cp .env.example .env            # fill in the values
+echo "VITE_SECRET_KEY=<same as DATA_ENCRYPTION_SECRET_KEY>" > client/.env
+npm install && (cd client && npm install)
+npm run dev                     # API on http://localhost:5000
+npm run client                  # site on http://localhost:5173
+```
 
 ### Certificate Verification
 The most useful feature which help us a lot to verify certificates shared to individuals appreciating effort.
