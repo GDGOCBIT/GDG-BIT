@@ -1,0 +1,10 @@
+const mongoose = require('mongoose');
+
+// Single document holding site-wide settings edited from the admin dashboard.
+const SettingsSchema = mongoose.Schema({
+    key: { type: String, default: 'site', unique: true },
+    socials: { type: Map, of: String, default: {} },   // platform key -> url ('' hides the link)
+    membersOverride: { type: Number, default: null },  // null = use the live count from gdg.community.dev
+});
+
+module.exports = mongoose.model('Settings', SettingsSchema);
