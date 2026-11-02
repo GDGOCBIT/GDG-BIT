@@ -41,7 +41,6 @@ const mergedTeam = async ({ admin = false } = {}) => {
         role: u.teamRole || DEFAULT_ROLE[u.teamGroup], team: u.teamGroup, order: ORDER[u.teamGroup],
         image: { url: u.avatar?.url || '' },
         ...Object.fromEntries(LINKS.map((f) => [f, u.showLinks === false ? '' : u.links?.[f] || ''])),
-        memberId: u.isPrivate || u.hiddenByAdmin ? undefined : String(u._id), // link to their public page when they have one
     }));
     const byKey = new Map(overrides.map((o) => [o.key, o]));
     // A linked account's own links (the ones on its public page) ARE the card's links, so both stay in sync.
@@ -67,7 +66,6 @@ const mergedTeam = async ({ admin = false } = {}) => {
             const acct = o.userEmail && byEmail.get(o.userEmail);
             if (acct) {
                 LINKS.forEach((f) => { out[f] = acct.showLinks === false ? '' : acct.links?.[f] || out[f] || ''; });
-                if (!acct.isPrivate && !acct.hiddenByAdmin) out.memberId = String(acct._id);
             }
         }
         if (admin) {
