@@ -1,1 +1,0 @@
-import{r as o}from"./index-Bo_U05vk.js";const e="GDG on Campus · Bengal Institute of Technology";function u(t){o.useEffect(()=>(t&&(document.title=`${t} · GDG on Campus BIT`),()=>{document.title=e}),[t])}export{u};
