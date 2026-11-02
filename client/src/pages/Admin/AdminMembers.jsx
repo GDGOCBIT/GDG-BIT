@@ -82,7 +82,7 @@ export default function AdminMembers () {
                   <td>{m.email}</td>
                   <td>{formatDate(m.joinedOn)}</td>
                   <td>{m.hiddenByAdmin ? <span className='pill pill-live'>hidden by admin</span> : m.isPrivate ? <span className='pill'>private</span> : <span className='pill pill-upcoming'>public</span>}</td>
-                  <td>{m.lead ? <span className='pill pill-yellow max-w-[11rem]' title={m.lead.role}><span className='truncate'>{m.lead.role}</span></span> : '—'}</td>
+                  <td>{m.lead ? <span className='pill pill-yellow max-w-[7rem]' title={m.lead.role}><span className='truncate'>{m.lead.role}</span></span> : '—'}</td>
                   <td className='whitespace-nowrap text-right'>
                     <button className='btn btn-ghost btn-sm mr-2' onClick={() => open(m)}>Edit</button>
                     <button className='btn btn-ghost btn-sm mr-2' onClick={() => toggle(m)}>{m.hiddenByAdmin ? 'Unhide' : 'Hide'}</button>
