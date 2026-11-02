@@ -39,7 +39,7 @@ export default function Lightbox ({ items, index, onClose, onIndex }) {
 
   const arrow = (dir, label) => (
     <button aria-label={label} onClick={e => { e.stopPropagation(); go(dir) }}
-      className='btn btn-light btn-icon !w-12 !h-12 sm:!w-14 sm:!h-14 !text-xl absolute top-1/2 -translate-y-1/2 z-10'
+      className='btn btn-light btn-still btn-icon !w-12 !h-12 sm:!w-14 sm:!h-14 !text-xl absolute top-1/2 -translate-y-1/2 z-10'
       style={{ [dir > 0 ? 'right' : 'left']: '0.75rem' }}>
       {dir > 0 ? '→' : '←'}
     </button>

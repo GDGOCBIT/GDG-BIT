@@ -240,14 +240,28 @@ img {
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
   text-decoration: none;
 }
-.btn:hover:not(:disabled) {
+.btn:not(.btn-still):hover:not(:disabled) {
   transform: translate(-2px, -2px);
   box-shadow: 3px 3px 0 var(--outline);
 }
-.btn:active:not(:disabled) {
+.btn:not(.btn-still):active:not(:disabled) {
   transform: scale(0.95);
   box-shadow: none;
   transition-duration: 0.1s;
+}
+/* Solid ink buttons would hide a same-coloured shadow (black on black): use a Google blue one instead */
+.btn-ink:not(.btn-still):hover:not(:disabled) {
+  box-shadow: 3px 3px 0 var(--blue);
+}
+/* Controls that sit in a moving strip or over a photo: they never shift, only the fill changes */
+.btn-still {
+  transition: background-color 0.15s ease;
+}
+.btn-still:hover:not(:disabled) {
+  background-color: var(--sunken);
+}
+.btn-still:active:not(:disabled) {
+  background-color: var(--hairline);
 }
 .btn:disabled {
   opacity: 0.55;
@@ -447,7 +461,7 @@ textarea.field {
     animation: none;
   }
   .lift:hover,
-  .btn:hover:not(:disabled) {
+  .btn:not(.btn-still):hover:not(:disabled) {
     transform: none;
   }
 }
@@ -609,6 +623,18 @@ textarea.field {
 .marquee { display: flex; width: max-content; animation: marquee var(--t, 45s) linear infinite; }
 .marquee.rev { animation-direction: reverse; }
 .marquee-wrap:hover .marquee { animation-play-state: paused; }
+
+/* Two tilted bands crossing in an X. The bands overshoot the viewport so no corner ever shows. */
+.marquee-x { position: relative; overflow: hidden; height: clamp(9.5rem, 12vw, 15rem); margin: 0.5rem 0; }
+.marquee-band {
+  position: absolute; left: -8%; right: -8%; top: 50%;
+  padding: 0.6rem 0; overflow: hidden;
+  border-top: 2px solid; border-bottom: 2px solid;
+  transform: translateY(-50%) rotate(var(--tilt));
+}
+.marquee-a { --tilt: -2.4deg; background: var(--black); color: var(--offwhite); border-color: var(--outline); z-index: 1; }
+.marquee-b { --tilt: 2.4deg; background: var(--yellow-ht); color: var(--black); border-color: var(--black); z-index: 2; }
+@media (min-width: 640px) { .marquee-band { padding: 0.9rem 0; } }
 
 @keyframes tick { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 

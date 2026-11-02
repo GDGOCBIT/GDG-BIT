@@ -97,10 +97,10 @@ export default function GalleryStrip () {
           <h2 className='title-1'>Moments we <b>keep building</b></h2>
         </div>
         <div className='flex items-center gap-2 self-start sm:self-auto'>
-          <button className='btn btn-ghost btn-icon' aria-label={paused ? 'Play the gallery' : 'Pause the gallery'} aria-pressed={paused} onClick={() => setPaused(p => !p)}>{paused ? '▶' : '❚❚'}</button>
-          <button className='btn btn-ghost btn-icon' aria-label='Scroll gallery left' onClick={() => slide(-1)}>←</button>
-          <button className='btn btn-ghost btn-icon' aria-label='Scroll gallery right' onClick={() => slide(1)}>→</button>
-          <Link to='/gallery' className='btn btn-ghost'>Open the gallery <Arrow width={26} /></Link>
+          <button className='btn btn-ghost btn-still btn-icon' aria-label={paused ? 'Play the gallery' : 'Pause the gallery'} aria-pressed={paused} onClick={() => setPaused(p => !p)}>{paused ? '▶' : '❚❚'}</button>
+          <button className='btn btn-ghost btn-still btn-icon' aria-label='Scroll gallery left' onClick={() => slide(-1)}>←</button>
+          <button className='btn btn-ghost btn-still btn-icon' aria-label='Scroll gallery right' onClick={() => slide(1)}>→</button>
+          <Link to='/gallery' className='btn btn-ghost btn-still'>Open the gallery <Arrow width={26} /></Link>
         </div>
       </div>
 
