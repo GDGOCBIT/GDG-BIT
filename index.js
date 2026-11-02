@@ -51,8 +51,9 @@ const dist = path.resolve(__dirname, 'client', 'dist');
 app.use(express.static(dist, {
     index: false,
     setHeaders(res, file) {
-        if (/[\\/]assets[\\/]/.test(file)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        else if (/\.(woff2|png|jpe?g|webp|avif|svg|ico)$/i.test(file)) res.setHeader('Cache-Control', 'public, max-age=2592000');
+        // s-maxage lets Vercel's CDN keep its own copy, so these never wake the function again
+        if (/[\\/]assets[\\/]/.test(file)) res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable');
+        else if (/\.(woff2|ttf|png|jpe?g|webp|avif|svg|ico)$/i.test(file)) res.setHeader('Cache-Control', 'public, max-age=2592000, s-maxage=2592000');
         else res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
     },
 }));
@@ -64,8 +65,9 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-connectDatabase().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Connected to PORT => ${PORT}`);
-    })
+// Listen straight away so static files and the page shell never wait for MongoDB on a cold start;
+// mongoose queues any query that arrives before the connection is ready.
+app.listen(PORT, () => {
+    console.log(`Connected to PORT => ${PORT}`);
 });
+connectDatabase();
