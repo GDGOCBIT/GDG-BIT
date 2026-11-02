@@ -813,6 +813,5 @@ textarea.field {
   .btn:not(.btn-still):hover:not(:disabled),
   .btn-ink:not(.btn-still):hover:not(:disabled),
   .lift:hover { transform: none; box-shadow: none; }
-  .btn-still:hover:not(:disabled) { background-color: revert-layer; }
   .stack-card:hover .card { transform: none; box-shadow: 5px 5px 0 var(--outline); }
 }
