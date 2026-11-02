@@ -18,7 +18,8 @@ export default function AdminTeam () {
   const [q, setQ] = useState('')
 
   const open = m => {
-    setForm({ ...Object.fromEntries([...TEXT, ...LINKS].map(([k]) => [k, m.override?.[k] || ''])), userEmail: m.userEmail || '' })
+    const linked = !!m.userEmail // a linked account shares its links with its public page, so show what is live
+    setForm({ ...Object.fromEntries([...TEXT, ...LINKS].map(([k]) => [k, m.override?.[k] || (linked && LINKS.some(l => l[0] === k) ? m[k] || '' : '')])), userEmail: m.userEmail || '' })
     setEditing(m)
   }
 
@@ -75,7 +76,7 @@ export default function AdminTeam () {
           <form onSubmit={save} onClick={e => e.stopPropagation()}
             className='card !rounded-b-none sm:!rounded-[var(--radius)] w-full sm:max-w-lg max-h-[92vh] !overflow-y-auto p-5 sm:p-6 flex flex-col gap-4'>
             <h3 className='text-lg font-medium'>Edit {editing.original?.name}</h3>
-            <p className='text-xs text-[var(--muted)] -mt-2'>Leave a field blank to keep the original shown in grey.</p>
+            <p className='text-xs text-[var(--muted)] -mt-2'>Leave a field blank to keep the original shown in grey.{editing.userEmail && ' Links on a linked account are shared with its public member page.'}</p>
             {[...TEXT, ...LINKS].map(([k, label]) => (
               <div key={k}>
                 <label className='label' htmlFor={`t-${k}`}>{label}</label>

@@ -44,6 +44,13 @@ const mergedTeam = async ({ admin = false } = {}) => {
         memberId: u.isPrivate || u.hiddenByAdmin ? undefined : String(u._id), // link to their public page when they have one
     }));
     const byKey = new Map(overrides.map((o) => [o.key, o]));
+    // A linked account's own links (the ones on its public page) ARE the card's links, so both stay in sync.
+    const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const linkedList = [...linkedEmails];
+    const accounts = linkedList.length
+        ? await User.find({ email: { $in: linkedList.map((e) => new RegExp(`^${esc(e)}$`, 'i')) } }).select('email links showLinks isPrivate hiddenByAdmin').lean()
+        : [];
+    const byEmail = new Map(accounts.map((u) => [String(u.email).toLowerCase(), u]));
     const names = new Set(local.map((m) => keyOf(m.name)));
     const base = [
         ...local.map((m) => ({ ...m, source: 'local' })),
@@ -57,6 +64,11 @@ const mergedTeam = async ({ admin = false } = {}) => {
         const out = { ...m, key };
         if (o) {
             [...TEXT, ...LINKS].forEach((f) => { if (o[f]) out[f] = o[f]; });
+            const acct = o.userEmail && byEmail.get(o.userEmail);
+            if (acct) {
+                LINKS.forEach((f) => { out[f] = acct.showLinks === false ? '' : acct.links?.[f] || out[f] || ''; });
+                if (!acct.isPrivate && !acct.hiddenByAdmin) out.memberId = String(acct._id);
+            }
         }
         if (admin) {
             out.original = { name: m.name, role: m.role, team: m.team, ...Object.fromEntries(LINKS.map((f) => [f, m[f] || ''])) };
