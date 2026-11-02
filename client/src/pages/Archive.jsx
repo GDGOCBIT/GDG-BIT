@@ -1,3 +1,4 @@
+import { LuArrowRight } from 'react-icons/lu'
 import useApi from '../utils/useApi'
 import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
@@ -48,7 +49,7 @@ export default function Archive () {
                           <p className='font-medium leading-snug line-clamp-2'>{e.title}</p>
                           <p className='mono text-xs text-[var(--muted)] mt-1'>{formatDate(e.startDate)} · {e.mode}</p>
                         </div>
-                        <span aria-hidden='true' className='max-sm:hidden'>→</span>
+                        <LuArrowRight aria-hidden='true' className='max-sm:hidden' />
                       </a>
                     </li>
                   ))}

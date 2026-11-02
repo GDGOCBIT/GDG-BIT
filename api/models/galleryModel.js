@@ -10,6 +10,8 @@ const GallerySchema = mongoose.Schema({
     mime: { type: String, default: 'image/jpeg' },
     image: { type: Buffer, select: false },
     thumb: { type: Buffer, select: false },
+    // resized copies (WebP/JPEG) kept after the first request so they are never re-generated, even after a deploy
+    variants: { type: [{ key: String, data: Buffer }], select: false },
     createdAt: { type: Date, default: Date.now },
 });
 

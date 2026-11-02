@@ -117,7 +117,7 @@ function TeamPreview ({ team }) {
         </div>
         <div className='flex flex-wrap -space-x-3'>
           {team.slice(0, 8).map(m => (
-            <img key={m._id} src={m.image?.url || '/user.svg'} alt={m.name} title={m.name}
+            <img key={m._id} src={sized(m.image?.url, 200) || '/user.svg'} alt={m.name} title={m.name}
               className='w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[var(--outline)] bg-[var(--sunken)]' />
           ))}
         </div>

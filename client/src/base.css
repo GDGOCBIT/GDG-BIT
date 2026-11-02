@@ -315,6 +315,9 @@ img {
   border-color: var(--offwhite);
 }
 
+/* Doodle arrows inside buttons take the button's text colour, so they never vanish on a dark or light fill */
+.btn .doodle { color: currentColor; }
+
 /* ---------------------------------------------------------------- pills -- */
 .pill {
   display: inline-flex;

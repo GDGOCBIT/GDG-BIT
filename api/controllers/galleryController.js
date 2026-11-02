@@ -23,24 +23,39 @@ exports.list = async (req, res) => {
 // Responses are immutable and CDN-cacheable, so each size is only ever generated once.
 exports.image = async (req, res) => {
     try {
-        const g = await GalleryItem.findById(req.params.id).select('+image +thumb mime');
-        if (!g) return res.status(404).end();
-        const want = parseInt(req.query.w, 10);
+        const id = req.params.id;
+        if (!/^[a-f\d]{24}$/i.test(id)) return res.status(404).end();
         const forever = 'public, max-age=31536000, s-maxage=31536000, immutable';
+        const want = parseInt(req.query.w, 10);
 
         if (want > 0) {
             const w = WIDTHS.find((x) => x >= want) || WIDTHS[WIDTHS.length - 1];
+            const webp = /image\/webp/.test(req.headers.accept || '');
+            const key = `${w}-${webp ? 'webp' : 'jpeg'}`;
+            const send = (data) => {
+                res.set({ 'Content-Type': webp ? 'image/webp' : 'image/jpeg', 'Cache-Control': forever, Vary: 'Accept' });
+                return res.send(data);
+            };
+
+            // 1) a copy resized earlier: a plain database read, no image processing
+            const hit = await GalleryItem.findOne({ _id: id, 'variants.key': key }).select({ variants: { $elemMatch: { key } } }).lean();
+            if (hit?.variants?.[0]?.data) return send(hit.variants[0].data.buffer ? Buffer.from(hit.variants[0].data.buffer) : hit.variants[0].data);
+
+            // 2) resize once, then remember the result
+            const g = await GalleryItem.findById(id).select('+image +thumb');
+            if (!g) return res.status(404).end();
             const src = w <= 700 && g.thumb?.length ? g.thumb : g.image;
             if (!src?.length) return res.status(404).end();
-            const webp = /image\/webp/.test(req.headers.accept || '');
             try {
                 const out = await sharp(src).rotate().resize({ width: w, withoutEnlargement: true })
                     [webp ? 'webp' : 'jpeg'](webp ? { quality: 76 } : { quality: 80, mozjpeg: true }).toBuffer();
-                res.set({ 'Content-Type': webp ? 'image/webp' : 'image/jpeg', 'Cache-Control': forever, Vary: 'Accept' });
-                return res.send(out);
+                await GalleryItem.updateOne({ _id: id, 'variants.key': { $ne: key } }, { $push: { variants: { key, data: out } } }).catch(() => {});
+                return send(out);
             } catch (e) { /* fall through to the stored original */ }
         }
 
+        const g = await GalleryItem.findById(id).select('+image +thumb mime');
+        if (!g) return res.status(404).end();
         const buf = req.query.size === 'thumb' && g.thumb?.length ? g.thumb : g.image;
         if (!buf?.length) return res.status(404).end();
         res.set({ 'Content-Type': g.mime || 'image/jpeg', 'Cache-Control': forever });

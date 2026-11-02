@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
 import SocialPills from '../components/SocialPills'
 import { formatDate } from '../utils/api'
+import { sized } from '../utils/images'
 import { useAuthStore } from '../store/useAuthStore'
 
 const TONES = ['var(--blue-pa)', 'var(--red-pa)', 'var(--yellow-pa)', 'var(--green-pa)']
@@ -41,7 +42,7 @@ export default function Members () {
             <article key={m._id} className='card lift flex flex-col relative'>
               <Link to={`/members/${m._id}`} className='absolute inset-0 z-10' aria-label={`Open ${m.name}`} />
               <div className='aspect-square border-b-2 border-[var(--outline)]' style={{ background: TONES[i % 4] }}>
-                <img src={m.avatar || '/user.svg'} alt='' loading='lazy' decoding='async' width='300' height='300' className='w-full h-full object-cover' />
+                <img src={sized(m.avatar, 480) || '/user.svg'} alt='' loading='lazy' decoding='async' width='300' height='300' className='w-full h-full object-cover' />
               </div>
               <div className='p-4 flex flex-col gap-2 flex-1'>
                 <p className='font-medium leading-snug'>{m.name}</p>

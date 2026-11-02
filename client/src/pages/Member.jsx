@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { api, formatDate } from '../utils/api'
 import useTitle from '../utils/useTitle'
+import { sized } from '../utils/images'
 import EmptyState from '../components/EmptyState'
 import SocialPills from '../components/SocialPills'
 
@@ -40,7 +41,7 @@ export default function Member () {
   return (
     <div className='wrap page-top max-w-3xl'>
       <div className='band band-blue px-6 py-8 sm:px-10 flex flex-col sm:flex-row sm:items-center gap-5'>
-        <img src={m.avatar || '/user.svg'} alt='' className='w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-[var(--black)] bg-white' />
+        <img src={sized(m.avatar, 400) || '/user.svg'} alt='' className='w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-[var(--black)] bg-white' />
         <div className='min-w-0 flex-1'>
           <p className='mono text-sm'>{'{ member }'}</p>
           <h1 className='title-1 break-words'>{m.name}</h1>
