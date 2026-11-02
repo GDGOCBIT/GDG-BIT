@@ -9,6 +9,8 @@ const Auth = lazy(() => import('./pages/Auth'))
 const Events = lazy(() => import('./pages/Events'))
 const Archive = lazy(() => import('./pages/Archive'))
 const Team = lazy(() => import('./pages/Team'))
+const Members = lazy(() => import('./pages/Members'))
+const Member = lazy(() => import('./pages/Member'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Projects = lazy(() => import('./pages/Projects'))
 const Profile = lazy(() => import('./pages/Profile'))
@@ -49,6 +51,8 @@ function App () {
         <Route path='/archive' element={<Archive />} />
         <Route path='/gallery' element={<Gallery />} />
         <Route path='/team' element={<Team />} />
+        <Route path='/members' element={<Members />} />
+        <Route path='/members/:id' element={<Member />} />
         <Route path='/projects' element={<Projects />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/admin' element={<Admin />} />

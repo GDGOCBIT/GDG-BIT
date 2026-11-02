@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /auth
+Disallow: /profile
+Sitemap: https://gdg-bit.vercel.app/sitemap.xml

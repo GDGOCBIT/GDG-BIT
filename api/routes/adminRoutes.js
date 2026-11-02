@@ -6,6 +6,8 @@ const galleryUpload = require("../middleware/galleryUpload.js");
 const gallery = require("../controllers/galleryController.js");
 const settings = require("../controllers/settingsController.js");
 const admins = require("../controllers/adminUsersController.js");
+const team = require("../controllers/teamController.js");
+const members = require("../controllers/membersController.js");
 
 const router = express.Router();
 router.use("/admin", isLoginToken, isAdmin);
@@ -19,6 +21,13 @@ const crudRoutes = (path, h) => {
     router.delete(`/admin/${path}/:id`, h.remove);
 };
 crudRoutes("projects", c.projects);
+
+router.get("/admin/team", team.adminList);
+router.put("/admin/team/:key", team.adminSave);
+router.delete("/admin/team/:key", team.adminReset);
+
+router.get("/admin/members", members.adminList);
+router.put("/admin/members/:id", members.adminSave);
 
 router.get("/admin/certs", c.listCerts);
 router.post("/admin/certs", c.createCert);

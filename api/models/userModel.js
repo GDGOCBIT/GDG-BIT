@@ -26,6 +26,12 @@ const UserSchema = mongoose.Schema({
     jwtForgotToken: { type: String, select: false },
     jwtRegisterToken: { type: String, select: false },
     jwtLoginToken: { type: String, select: false },
+    // Public member page (opt-out: everyone is listed until they switch it off)
+    bio: { type: String, maxlength: 240 },
+    links: { website: String, linkedin: String, github: String, twitter: String, instagram: String },
+    isPrivate: { type: Boolean, default: false },
+    showCerts: { type: Boolean, default: true },
+    hiddenByAdmin: { type: Boolean, default: false },
     joinedOn: {
         type: Date,
         default: Date.now,

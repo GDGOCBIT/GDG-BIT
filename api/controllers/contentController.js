@@ -1,8 +1,8 @@
 const Event = require('../models/eventModel.js');
-const TeamMember = require('../models/teamModel.js');
 const Project = require('../models/projectModel.js');
 const { getOrgProjects } = require('../services/github.js');
-const { getCommunityEvents, getCommunityTeam } = require('../services/gdgCommunity.js');
+const { getCommunityEvents } = require('../services/gdgCommunity.js');
+const { mergedTeam } = require('../services/team.js');
 const { serverError } = require('../utils/crudFactory.js');
 
 const statusOf = (start, end) => {
@@ -33,16 +33,7 @@ exports.listEvents = async (req, res) => {
 
 exports.listTeam = async (req, res) => {
     try {
-        const [local, community] = await Promise.all([
-            TeamMember.find().sort({ order: 1, name: 1 }).lean(),
-            getCommunityTeam(),
-        ]);
-        const names = new Set(local.map((m) => m.name.trim().toLowerCase()));
-        const items = [
-            ...local.map((m) => ({ ...m, source: 'local' })),
-            ...community.filter((m) => !names.has(m.name.toLowerCase())),
-        ];
-        res.status(200).json({ success: true, items });
+        res.status(200).json({ success: true, items: await mergedTeam() });
     } catch (e) { serverError(res, e); }
 };
 

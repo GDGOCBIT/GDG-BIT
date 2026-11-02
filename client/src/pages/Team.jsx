@@ -50,9 +50,11 @@ export default function Team () {
                     <p className='font-medium leading-snug'>{m.name}</p>
                     <p className='mono text-xs text-[var(--muted)]'>{m.role}</p>
                     <div className='flex flex-wrap gap-1.5 mt-auto pt-2'>
+                      <SocialLink href={m.website} label='Website' />
                       <SocialLink href={m.linkedin} label='LinkedIn' />
                       <SocialLink href={m.github} label='GitHub' />
                       <SocialLink href={m.twitter} label='X' />
+                      <SocialLink href={m.instagram} label='Instagram' />
                       <SocialLink href={m.profile} label='GDG' />
                     </div>
                   </div>

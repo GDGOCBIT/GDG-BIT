@@ -18,7 +18,7 @@ exports.team = crudFactory(TeamMember, {
     label: 'Team member',
     folder: 'BIT/Team',
     sort: { order: 1, name: 1 },
-    fields: ['name', 'role', 'team', 'order', 'linkedin', 'github', 'twitter'],
+    fields: ['name', 'role', 'team', 'order', 'linkedin', 'github', 'twitter', 'instagram', 'website'],
 });
 
 exports.projects = crudFactory(Project, {

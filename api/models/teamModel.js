@@ -9,6 +9,8 @@ const TeamSchema = mongoose.Schema({
     linkedin: String,
     github: String,
     twitter: String,
+    instagram: String,
+    website: String,
 });
 
 module.exports = mongoose.model('TeamMember', TeamSchema);

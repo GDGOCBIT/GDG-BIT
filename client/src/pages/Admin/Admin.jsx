@@ -7,6 +7,8 @@ import Certificates from './Certificates'
 import AdminGallery from './AdminGallery'
 import AdminSettings from './AdminSettings'
 import AdminAdmins from './AdminAdmins'
+import AdminTeam from './AdminTeam'
+import AdminMembers from './AdminMembers'
 
 const thumb = i =>
   <img src={i.image?.url || '/user.svg'} alt='' className='w-10 h-10 rounded-lg object-cover bg-[var(--sunken)]' />
@@ -53,7 +55,7 @@ function Overview () {
   )
 }
 
-const TABS = [['overview', 'Overview'], ['certs', 'Certificates'], ['gallery', 'Gallery'], ['projects', 'Projects'], ['settings', 'Social links'], ['admins', 'Admins']]
+const TABS = [['overview', 'Overview'], ['certs', 'Certificates'], ['gallery', 'Gallery'], ['projects', 'Projects'], ['team', 'Team'], ['members', 'Members'], ['settings', 'Social links'], ['admins', 'Admins']]
 
 export default function Admin () {
   const { user, verifyLoading } = useAuthStore()
@@ -86,7 +88,7 @@ export default function Admin () {
         ))}
       </div>
 
-      {tab === 'overview' ? <Overview /> : tab === 'certs' ? <Certificates /> : tab === 'gallery' ? <AdminGallery /> : tab === 'settings' ? <AdminSettings /> : tab === 'admins' ? <AdminAdmins /> : <ResourceManager key={tab} config={CONFIGS[tab]} />}
+      {tab === 'overview' ? <Overview /> : tab === 'certs' ? <Certificates /> : tab === 'gallery' ? <AdminGallery /> : tab === 'settings' ? <AdminSettings /> : tab === 'team' ? <AdminTeam /> : tab === 'members' ? <AdminMembers /> : tab === 'admins' ? <AdminAdmins /> : <ResourceManager key={tab} config={CONFIGS[tab]} />}
     </div>
   )
 }
