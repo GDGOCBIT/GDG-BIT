@@ -47,7 +47,7 @@ export default function Team () {
               {groups[g].map((m, i) => (
                 <article key={m._id} className='card lift flex flex-col'>
                   <div className='aspect-square border-b-2 border-[var(--outline)] overflow-hidden' style={{ background: TONES[(gi + i) % 4] }}>
-                    <Img src={sized(m.image?.url, 480) || '/user.svg'} srcSet={m.image?.url ? `${sized(m.image.url, 240)} 240w, ${sized(m.image.url, 480)} 480w` : undefined} sizes='(min-width: 1024px) 240px, 45vw' alt={m.name} loading='lazy' decoding='async' width='300' height='300' className='w-full h-full object-cover' />
+                    <Img src={sized(m.image?.url, 480) || '/user.svg'} fallbacks={[m.image?.url, '/user.svg'].filter(Boolean)} srcSet={m.image?.url ? `${sized(m.image.url, 240)} 240w, ${sized(m.image.url, 480)} 480w` : undefined} sizes='(min-width: 1024px) 240px, 45vw' alt={m.name} loading='lazy' decoding='async' width='300' height='300' className='w-full h-full object-cover' />
                   </div>
                   <div className='p-4 flex flex-col gap-2 flex-1'>
                     <p className='font-medium leading-snug'>{m.name}</p>

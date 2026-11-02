@@ -38,21 +38,23 @@ export default function Members () {
         )}
         {error && <EmptyState title='Could not load members' text={error} tone='red' />}
         {!loading && !error && !shown.length && <EmptyState title={q ? 'No one matches that' : 'No members yet'} text={q ? 'Try a different name.' : 'Be the first: create an account and your page appears here.'} tone='blue' />}
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5'>
+        <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4'>
           {shown.map((m, i) => (
-            <article key={m._id} className='card lift flex flex-col relative'>
+            <article key={m._id} className='card lift relative p-4 flex flex-col items-center text-center gap-2'>
               <Link to={`/members/${m._id}`} className='absolute inset-0 z-10' aria-label={`Open ${m.name}`} />
-              <div className='aspect-square border-b-2 border-[var(--outline)]' style={{ background: TONES[i % 4] }}>
-                <Img src={sized(m.avatar, 480) || '/user.svg'} srcSet={m.avatar ? `${sized(m.avatar, 240)} 240w, ${sized(m.avatar, 480)} 480w` : undefined} sizes='(min-width: 1024px) 240px, 45vw' alt='' loading='lazy' decoding='async' width='300' height='300' className='w-full h-full object-cover' />
+              <div className='w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-[var(--outline)] shrink-0' style={{ background: TONES[i % 4] }}>
+                <Img src={sized(m.avatar, 192) || '/user.svg'}
+                  srcSet={m.avatar ? `${sized(m.avatar, 96)} 96w, ${sized(m.avatar, 192)} 192w, ${sized(m.avatar, 288)} 288w` : undefined}
+                  sizes='96px' fallbacks={[m.avatar, '/user.svg'].filter(Boolean)} alt='' loading='lazy' width='96' height='96' className='w-full h-full object-cover' />
               </div>
-              <div className='p-4 flex flex-col gap-2 flex-1'>
-                <p className='font-medium leading-snug'>{m.name}</p>
-                {m.bio ? <p className='text-sm text-[var(--muted)] line-clamp-2'>{m.bio}</p> : <p className='mono text-xs text-[var(--muted)]'>Member since {formatDate(m.joinedOn)}</p>}
-                <div className='flex flex-wrap items-center gap-1.5 mt-auto pt-2 relative z-20'>
-                  {m.lead && <span className='pill pill-yellow max-w-full' title={m.lead.role}><span className='truncate'>{m.lead.role}</span></span>}
-                  {m.certificates > 0 && <span className='pill pill-upcoming'>{m.certificates} {m.certificates === 1 ? 'certificate' : 'certificates'}</span>}
-                  <SocialPills links={m.links} />
-                </div>
+              <p className='font-medium leading-snug break-words w-full'>{m.name}</p>
+              {m.lead && <span className='pill pill-yellow max-w-full' title={m.lead.role}><span className='truncate'>{m.lead.role}</span></span>}
+              {m.bio
+                ? <p className='text-xs text-[var(--muted)] line-clamp-2'>{m.bio}</p>
+                : <p className='mono text-[0.7rem] text-[var(--muted)]'>Since {formatDate(m.joinedOn)}</p>}
+              <div className='flex flex-wrap justify-center items-center gap-1.5 mt-auto pt-1 relative z-20'>
+                {m.certificates > 0 && <span className='pill pill-upcoming'>{m.certificates} {m.certificates === 1 ? 'cert' : 'certs'}</span>}
+                <SocialPills links={m.links} className='justify-center' />
               </div>
             </article>
           ))}

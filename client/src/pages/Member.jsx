@@ -41,7 +41,7 @@ export default function Member () {
   return (
     <div className='wrap page-top max-w-3xl'>
       <div className='band band-blue px-6 py-8 sm:px-10 flex flex-col sm:flex-row sm:items-center gap-5'>
-        <img src={sized(m.avatar, 400) || '/user.svg'} alt='' className='w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-[var(--black)] bg-white' />
+        <img src={sized(m.avatar, 400) || '/user.svg'} onError={e => { if (!e.target.dataset.f) { e.target.dataset.f = '1'; e.target.src = m.avatar || '/user.svg' } else e.target.src = '/user.svg' }} alt='' className='w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-[var(--black)] bg-white' />
         <div className='min-w-0 flex-1'>
           <p className='mono text-sm flex flex-wrap items-center gap-2'>{'{ member }'}{m.lead && <Link to='/team' className='pill pill-yellow max-w-[16rem]' title={m.lead.role}><span className='truncate'>{m.lead.role}</span></Link>}</p>
           <h1 className='title-1 break-words'>{m.name}</h1>
