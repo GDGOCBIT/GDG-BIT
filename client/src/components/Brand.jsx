@@ -89,3 +89,12 @@ export const NotchedPhoto = ({ src, alt = '', className = '' }) => (
       fill='none' stroke='var(--outline)' strokeWidth='3' />
   </svg>
 )
+
+/** Line-art "</>" doodle, drawn in the same thick ink stroke as the other brand shapes. */
+export const CodeTag = ({ size = 92, className = '' }) => (
+  <svg width={size} height={size * 0.62} viewBox='0 0 100 62' fill='none' stroke='currentColor' strokeWidth='6' strokeLinecap='round' strokeLinejoin='round' className={`doodle ${className}`} aria-hidden='true'>
+    <path d='M30 12 8 31l22 19' />
+    <path d='M70 12l22 19-22 19' />
+    <path d='M57 6 43 56' stroke='var(--red)' />
+  </svg>
+)

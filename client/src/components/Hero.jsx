@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Arrow, BraceTag, COMMUNITY_URL, Dots, Globe, Slashes, Spark } from './Brand'
+import { Arrow, BraceTag, CodeTag, COMMUNITY_URL, Dots, Slashes, Spark } from './Brand'
 import { formatDate } from '../utils/api'
 import useGallery from '../utils/useGallery'
 import { Live } from './HeroParts'
+import InteractiveGlobe from './InteractiveGlobe'
 
 const WORDS = [['learn', 'var(--blue)'], ['build', 'var(--red)'], ['ship', 'var(--yellow)'], ['grow', 'var(--green)']]
 
@@ -120,9 +121,14 @@ function PosterStack () {
         )
       })}
 
+      {/* interactive globe in the middle of the cards: drag it to spin */}
+      <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] aspect-square' style={{ zIndex: 5 }}>
+        <InteractiveGlobe className='w-full h-full block rounded-full' />
+      </div>
+
       {/* floating extras */}
       <div className='hero-extras'>
-      <Globe size={92} className='absolute -top-3 right-0 float-y text-[var(--outline)]' />
+      <CodeTag size={96} className='absolute -top-2 right-0 float-y text-[var(--outline)]' />
       <Dots color='var(--red)' size={20} className='absolute bottom-[2%] right-[4%] float-r' />
       <Spark size={34} className='absolute top-[42%] -right-1 spin-slow' />
       <Slashes size={56} color='var(--yellow-ht)' className='absolute top-[40%] -left-3 float-r' />
