@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import IconLink from '../components/IconLink'
 import useApi from '../utils/useApi'
 import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
@@ -7,11 +7,6 @@ import Img from '../components/Img'
 
 const TONES = ['var(--blue-pa)', 'var(--red-pa)', 'var(--yellow-pa)', 'var(--green-pa)']
 const ORDER = ['Organizers', 'Leads', 'Core']
-
-const SocialLink = ({ href, label }) =>
-  href ? (
-    <a href={href} target='_blank' rel='noreferrer' className='pill hover:bg-[var(--sunken)]'>{label}</a>
-  ) : null
 
 export default function Team () {
   const { items, loading, error } = useApi('/team')
@@ -52,14 +47,14 @@ export default function Team () {
                   <div className='p-4 flex flex-col gap-2 flex-1'>
                     <p className='font-medium leading-snug'>{m.name}</p>
                     <p className='mono text-xs text-[var(--muted)]'>{m.role}</p>
-                    <div className='flex flex-wrap gap-1.5 mt-auto pt-2'>
-                      {m.memberId && <Link to={`/members/${m.memberId}`} className='pill pill-blue'>Profile</Link>}
-                      <SocialLink href={m.website} label='Website' />
-                      <SocialLink href={m.linkedin} label='LinkedIn' />
-                      <SocialLink href={m.github} label='GitHub' />
-                      <SocialLink href={m.twitter} label='X' />
-                      <SocialLink href={m.instagram} label='Instagram' />
-                      <SocialLink href={m.profile} label='GDG' />
+                    <div className='flex flex-wrap gap-2 mt-auto pt-2'>
+                      <IconLink name='profile' label='Open profile page' to={m.memberId ? `/members/${m.memberId}` : undefined} />
+                      <IconLink name='website' label='Website' href={m.website} />
+                      <IconLink name='linkedin' label='LinkedIn' href={m.linkedin} />
+                      <IconLink name='github' label='GitHub' href={m.github} />
+                      <IconLink name='twitter' label='X' href={m.twitter} />
+                      <IconLink name='instagram' label='Instagram' href={m.instagram} />
+                      <IconLink name='community' label='GDG community profile' href={m.profile} />
                     </div>
                   </div>
                 </article>

@@ -1,6 +1,6 @@
 import { FaDiscord, FaGithub, FaInstagram, FaLinkedinIn, FaXTwitter, FaYoutube } from 'react-icons/fa6'
 import { FcGoogle } from 'react-icons/fc'
-import { LuMail } from 'react-icons/lu'
+import { LuGlobe, LuMail, LuUser } from 'react-icons/lu'
 
 // One place for every brand / contact icon on the site, so they all come from the same library and colours.
 const ICONS = {
@@ -12,7 +12,9 @@ const ICONS = {
   twitter: [FaXTwitter, '#000000'],
   youtube: [FaYoutube, '#ff0000'],
   email: [LuMail, '#ea4335'],
-  google: [FcGoogle, undefined]
+  google: [FcGoogle, undefined],
+  website: [LuGlobe, '#1a73e8'],
+  profile: [LuUser, '#1e1e1e']
 }
 
 /** Icon for a platform key (instagram, github, community…). `community` is the GDG mark. */
