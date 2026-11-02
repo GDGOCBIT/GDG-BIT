@@ -53,7 +53,7 @@ export default function AdminAdmins () {
         {items.map(a => {
           const [label, tone] = BADGE[a.source]
           return (
-            <li key={a.email} className='card p-4 flex items-center gap-4'>
+            <li key={a.email} className='card p-4 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-2'>
               <img src={a.avatar || '/user.svg'} alt='' className='w-12 h-12 rounded-full object-cover border-2 border-[var(--outline)] bg-[var(--sunken)] shrink-0' />
               <div className='min-w-0 flex-1'>
                 <p className='font-medium truncate'>{a.name || a.email}{a.you && <span className='text-[var(--muted)] font-normal'> (you)</span>}</p>
@@ -61,7 +61,7 @@ export default function AdminAdmins () {
                 <span className={`pill ${tone} mt-1.5`}>{label}</span>
               </div>
               {a.locked ? (
-                <span className='text-xs text-[var(--muted)] max-w-[8rem] text-right'>Permanent owner</span>
+                <span className='text-xs text-[var(--muted)] sm:max-w-[8rem] sm:text-right'>Permanent owner</span>
               ) : a.you ? null : (
                 <button className='btn btn-danger btn-sm shrink-0' onClick={() => remove(a)}>Remove</button>
               )}

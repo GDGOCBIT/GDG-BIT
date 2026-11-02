@@ -133,7 +133,7 @@ export default function ResourceManager ({ config, extra }) {
           <form
             onSubmit={submit}
             onClick={e => e.stopPropagation()}
-            className='card !rounded-b-none sm:!rounded-[var(--radius)] w-full sm:max-w-lg max-h-[92vh] !overflow-y-auto p-5 sm:p-6 flex flex-col gap-4'
+            className='card !rounded-b-none sm:!rounded-[var(--radius)] w-full sm:max-w-lg max-h-[92dvh] !overflow-y-auto p-5 sm:p-6 flex flex-col gap-4'
           >
             <h3 className='text-lg font-medium'>{editing === 'new' ? 'Add' : 'Edit'} {title.toLowerCase()}</h3>
             {idField && (

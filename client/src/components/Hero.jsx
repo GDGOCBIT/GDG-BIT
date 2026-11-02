@@ -161,7 +161,7 @@ export default function Hero ({ events, team, members }) {
 
   return (
     <section className='wrap page-top pb-4'>
-      <div className='grid grid-cols-1 lg:grid-cols-[1.12fr_1fr] gap-12 lg:gap-6 items-center lg:hero-min pt-4 sm:pt-8'>
+      <div className='grid grid-cols-1 lg:grid-cols-[1.12fr_1fr] gap-8 lg:gap-6 items-center lg:hero-min pt-4 sm:pt-8'>
         <div className='relative flex flex-col gap-5 sm:gap-6 min-w-0'>
           <div className='ambient' aria-hidden='true' />
 

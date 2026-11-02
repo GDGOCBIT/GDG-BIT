@@ -300,7 +300,7 @@ export default function TemplateEditor ({ template, onClose, onSaved }) {
               <p className='text-[var(--muted)] max-w-md'>Upload a PNG / JPG / WebP (up to 4 MB) with empty space where the name and QR code should go. 2000–3000px wide is plenty.</p>
             </div>
           ) : bg && (
-            <div className='card p-2 sm:p-3 !overflow-auto bg-[var(--sunken)] max-h-[80vh]'>
+            <div className='card p-2 sm:p-3 !overflow-auto bg-[var(--sunken)] max-h-[80dvh]'>
               <div ref={stageRef} className='relative select-none touch-none' style={{ width: `${zoom}%`, margin: zoom <= 100 ? '0 auto' : 0 }}>
                 <canvas ref={canvasRef} className='w-full h-auto block rounded-lg' />
 

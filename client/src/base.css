@@ -496,6 +496,18 @@ textarea.field {
 }
 .table-wrap .table { min-width: 44rem; }
 
+/* Phones: keep rows on one line (the table scrolls sideways), and never let a form field trigger iOS zoom */
+.table-wrap .table th,
+.table-wrap .table td { white-space: nowrap; }
+@media (max-width: 767px) {
+  .field { font-size: 1rem; } /* iOS Safari zooms the page when a field under 16px gets focus */
+}
+/* Touch screens: bigger tap targets for the small controls */
+@media (pointer: coarse) {
+  .btn-sm { min-height: 2.6rem; }
+  .tab { min-height: 2.6rem; }
+}
+
 /* Admin table */
 .table {
   width: 100%;
@@ -795,3 +807,12 @@ textarea.field {
 }
 
 @media (min-width: 1024px) { .lg\:hero-min { min-height: calc(100vh - 9rem); min-height: calc(100svh - 9rem); } }
+
+/* Touch screens have no real hover: without this a tapped button/card stays lifted with its shadow until the next tap. */
+@media (hover: none) {
+  .btn:not(.btn-still):hover:not(:disabled),
+  .btn-ink:not(.btn-still):hover:not(:disabled),
+  .lift:hover { transform: none; box-shadow: none; }
+  .btn-still:hover:not(:disabled) { background-color: revert-layer; }
+  .stack-card:hover .card { transform: none; box-shadow: 5px 5px 0 var(--outline); }
+}
