@@ -1,6 +1,8 @@
 const GalleryItem = require('../models/galleryModel.js');
 const { serverError } = require('../utils/crudFactory.js');
-const sharp = require('sharp');
+// sharp is a large native module: load it only when a photo actually needs resizing, so cold starts stay short
+let sharpLib;
+const sharp = (...a) => (sharpLib ||= require('sharp'))(...a);
 
 // Widths the site is allowed to ask for (anything else is rounded up to the next one).
 const WIDTHS = [240, 480, 720, 1200, 1600];

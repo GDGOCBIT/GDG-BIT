@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/useAuthStore'
 import { api, formatDate } from '../../utils/api'
+import { loadStats, savedStats } from '../../utils/adminPrefetch'
 import ResourceManager from './ResourceManager'
 import Certificates from './Certificates'
 import AdminGallery from './AdminGallery'
@@ -39,16 +40,16 @@ const STAT_LABELS = [
 ]
 
 function Overview () {
-  const [stats, setStats] = useState(null)
+  const [stats, setStats] = useState(savedStats)
   useEffect(() => {
-    api('/admin/stats', { auth: true }).then(r => r.success && setStats(r.stats))
+    loadStats().then(r => r.success && setStats(r.stats))
   }, [])
   return (
     <div className='grid grid-cols-2 lg:grid-cols-5 gap-4'>
       {STAT_LABELS.map(([k, label, color]) => (
         <div key={k} className='band p-5 sm:p-6' style={{ background: color }}>
           <p className='mono text-xs'>{label}</p>
-          <p className='text-4xl sm:text-5xl font-medium mt-1'>{stats ? stats[k] : '–'}</p>
+          {stats ? <p className='text-4xl sm:text-5xl font-medium mt-1'>{stats[k]}</p> : <div className='skeleton rounded-lg h-10 w-16 mt-2' />}
         </div>
       ))}
     </div>

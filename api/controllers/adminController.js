@@ -205,10 +205,10 @@ exports.stats = async (req, res) => {
     try {
         const [users, certificates, templates, projects, photos] = await Promise.all([
             User.countDocuments({ isVerified: true }),
-            Certificate.countDocuments(),
-            CertTemplate.countDocuments(),
-            Project.countDocuments(),
-            require('../models/galleryModel.js').countDocuments(),
+            Certificate.estimatedDocumentCount(),
+            CertTemplate.estimatedDocumentCount(),
+            Project.estimatedDocumentCount(),
+            require('../models/galleryModel.js').estimatedDocumentCount(),
         ]);
         res.status(200).json({ success: true, stats: { users, certificates, templates, projects, photos } });
     } catch (e) { serverError(res, e); }

@@ -2,6 +2,8 @@ const SECRET_KEY = import.meta.env.VITE_SECRET_KEY
 
 // crypto-js is ~60 KB gzipped and only needed once someone is signed in or opens a certificate,
 // so it is loaded on demand (and only the AES + UTF-8 parts of it).
+export const warmCrypto = () => Promise.all([import('crypto-js/aes'), import('crypto-js/enc-utf8')]).catch(() => {})
+
 export const decrypt = async cipher => {
   const [{ default: AES }, { default: Utf8 }] = await Promise.all([import('crypto-js/aes'), import('crypto-js/enc-utf8')])
   return JSON.parse(AES.decrypt(cipher, SECRET_KEY).toString(Utf8))
