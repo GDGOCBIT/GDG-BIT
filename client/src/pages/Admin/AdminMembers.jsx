@@ -16,9 +16,13 @@ export default function AdminMembers () {
 
   const [team, setTeam] = useState([])
   const [cardKey, setCardKey] = useState('') // team card chosen for the member being edited
+  const [group, setGroup] = useState('') // Organizers | Leads | Core | ''
+  const [title, setTitle] = useState('')
   useEffect(() => {
     if (!editing) return
     setCardKey(editing.lead?.key || '')
+    setGroup(editing.lead?.team || editing.teamGroup || '')
+    setTitle(editing.lead?.role || editing.teamRole || '')
     api('/admin/team?fresh=1', { auth: true }).then(r => r.success && setTeam(r.items))
   }, [editing])
   const norm = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '')
@@ -29,7 +33,9 @@ export default function AdminMembers () {
   const save = async e => {
     e.preventDefault()
     setSaving(true)
-    const res = await api(`/admin/members/${editing._id}`, { method: 'PUT', body: form, auth: true })
+    // with a linked GDG card the role is stored on that card; otherwise on the member themself
+    const body = { ...form, teamGroup: cardKey ? '' : group, teamRole: cardKey ? '' : title }
+    const res = await api(`/admin/members/${editing._id}`, { method: 'PUT', body, auth: true })
     // organizer / lead link: unlink the old card, link the chosen one
     if (res.success && cardKey !== (editing.lead?.key || '')) {
       if (editing.lead) await api(`/admin/team/${encodeURIComponent(editing.lead.key)}`, { method: 'PUT', body: { userEmail: '' }, auth: true })
@@ -37,6 +43,9 @@ export default function AdminMembers () {
         const r2 = await api(`/admin/team/${encodeURIComponent(cardKey)}`, { method: 'PUT', body: { userEmail: editing.email }, auth: true })
         if (!r2.success) toast.error(r2.msg)
       }
+    }
+    if (res.success && cardKey && (group !== (editing.lead?.team || '') || title !== (editing.lead?.role || '')) && (group || title)) {
+      await api(`/admin/team/${encodeURIComponent(cardKey)}`, { method: 'PUT', body: { team: group, role: title }, auth: true })
     }
     setSaving(false)
     if (res.success) { toast.success(res.msg); setEditing(null); reload() } else toast.error(res.msg)
@@ -99,6 +108,22 @@ export default function AdminMembers () {
                 <input id={`am-${k}`} className='field' value={form.links[k] || ''} onChange={e => setForm({ ...form, links: { ...form.links, [k]: e.target.value } })} />
               </div>
             ))}
+            <div className='grid sm:grid-cols-2 gap-3'>
+              <div>
+                <label className='label' htmlFor='am-group'>Team role</label>
+                <select id='am-group' className='field' value={group} onChange={e => setGroup(e.target.value)}>
+                  <option value=''>Regular member</option>
+                  <option value='Organizers'>Organizer</option>
+                  <option value='Leads'>Lead</option>
+                  <option value='Core'>Core team</option>
+                </select>
+              </div>
+              <div>
+                <label className='label' htmlFor='am-title'>Title</label>
+                <input id='am-title' className='field' value={title} disabled={!group} placeholder='e.g. Web Lead' maxLength={80} onChange={e => setTitle(e.target.value)} />
+              </div>
+              <p className='text-xs text-[var(--muted)] sm:col-span-2 -mt-1'>They appear on the Team page with this role. People on the GDG page can be linked to their card below instead.</p>
+            </div>
             <div>
               <label className='label' htmlFor='am-card'>Organizer / lead card</label>
               <select id='am-card' className='field' value={cardKey} onChange={e => setCardKey(e.target.value)}>

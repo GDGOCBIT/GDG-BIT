@@ -2,7 +2,7 @@ const User = require('../models/userModel.js');
 const Certificate = require('../models/certModel.js');
 const CertTemplate = require('../models/certTemplateModel.js');
 const TeamOverride = require('../models/teamOverrideModel.js');
-const { cleanLink, LINKS, mergedTeam } = require('../services/team.js');
+const { cleanLink, LINKS, mergedTeam, GROUPS } = require('../services/team.js');
 const { serverError, removeImage } = require('../utils/crudFactory.js');
 const { userIsAdmin } = require('../middleware/auth.js');
 
@@ -30,6 +30,10 @@ const leadMap = async () => {
     }));
 };
 
+// Team badge for a user: a linked GDG card wins, otherwise the role an admin set directly.
+const leadOf = (u, leads) =>
+    leads.get(String(u.email || '').toLowerCase()) || (u.teamGroup ? { role: u.teamRole || u.teamGroup, team: u.teamGroup } : null);
+
 const certsFor = async (email) => {
     const certs = await Certificate.find({ email: new RegExp(`^${escapeRegex(email)}$`, 'i') })
         .select('certificate templateId createdAt').sort({ createdAt: -1 }).lean();
@@ -42,11 +46,11 @@ const certsFor = async (email) => {
 // ---- public
 exports.list = async (req, res) => {
     try {
-        const users = await User.find(PUBLIC).select('firstName lastName avatar bio links joinedOn email showCerts').sort({ joinedOn: -1 }).limit(500).lean();
+        const users = await User.find(PUBLIC).select('firstName lastName avatar bio links joinedOn email showCerts teamGroup teamRole').sort({ joinedOn: -1 }).limit(500).lean();
         const counts = await Certificate.aggregate([{ $group: { _id: { $toLower: '$email' }, n: { $sum: 1 } } }]);
         const byEmail = new Map(counts.map((c) => [c._id, c.n]));
         const leads = await leadMap();
-        const items = users.map((u) => ({ ...view(u), lead: leads.get(String(u.email || '').toLowerCase()) || null, certificates: u.showCerts === false ? 0 : byEmail.get(String(u.email || '').toLowerCase()) || 0 }));
+        const items = users.map((u) => ({ ...view(u), lead: leadOf(u, leads), certificates: u.showCerts === false ? 0 : byEmail.get(String(u.email || '').toLowerCase()) || 0 }));
         res.status(200).json({ success: true, items });
     } catch (e) { serverError(res, e); }
 };
@@ -54,10 +58,10 @@ exports.list = async (req, res) => {
 exports.get = async (req, res) => {
     try {
         if (!isId(req.params.id)) return res.status(404).json({ success: false, msg: 'Member not found!' });
-        const u = await User.findOne({ _id: req.params.id, ...PUBLIC }).select('firstName lastName avatar bio links joinedOn email showCerts').lean();
+        const u = await User.findOne({ _id: req.params.id, ...PUBLIC }).select('firstName lastName avatar bio links joinedOn email showCerts teamGroup teamRole').lean();
         if (!u) return res.status(404).json({ success: false, msg: 'This profile is private or does not exist.' });
         const certificates = u.showCerts === false || !u.email ? [] : await certsFor(u.email);
-        const lead = (await leadMap()).get(String(u.email || '').toLowerCase()) || null;
+        const lead = leadOf(u, await leadMap());
         res.status(200).json({ success: true, member: { ...view(u), lead, certificates, certsHidden: u.showCerts === false } });
     } catch (e) { serverError(res, e); }
 };
@@ -92,9 +96,9 @@ exports.mySave = async (req, res) => {
 // ---- admin override: hide anyone from the public pages, or fix their bio / links
 exports.adminList = async (req, res) => {
     try {
-        const users = await User.find({ isVerified: true }).select('firstName lastName email avatar bio links isPrivate showCerts hiddenByAdmin joinedOn').sort({ joinedOn: -1 }).limit(1000).lean();
+        const users = await User.find({ isVerified: true }).select('firstName lastName email avatar bio links isPrivate showCerts hiddenByAdmin joinedOn teamGroup teamRole').sort({ joinedOn: -1 }).limit(1000).lean();
         const leads = await leadMap();
-        res.status(200).json({ success: true, items: users.map((u) => ({ ...view(u), email: u.email, lead: leads.get(String(u.email || '').toLowerCase()) || null, isPrivate: !!u.isPrivate, hiddenByAdmin: !!u.hiddenByAdmin, links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])) })) });
+        res.status(200).json({ success: true, items: users.map((u) => ({ ...view(u), email: u.email, lead: leadOf(u, leads), teamGroup: u.teamGroup || '', teamRole: u.teamRole || '', isPrivate: !!u.isPrivate, hiddenByAdmin: !!u.hiddenByAdmin, links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])) })) });
     } catch (e) { serverError(res, e); }
 };
 
@@ -106,6 +110,12 @@ exports.adminSave = async (req, res) => {
         const err = apply(user, req.body);
         if (err) return res.status(400).json({ success: false, msg: err });
         if (req.body.hiddenByAdmin !== undefined) user.hiddenByAdmin = !!req.body.hiddenByAdmin;
+        if (req.body.teamGroup !== undefined) {
+            if (req.body.teamGroup && !GROUPS.includes(req.body.teamGroup)) return res.status(400).json({ success: false, msg: 'Choose Organizer, Lead or Core.' });
+            user.teamGroup = req.body.teamGroup || undefined;
+            if (!user.teamGroup) user.teamRole = undefined;
+        }
+        if (req.body.teamRole !== undefined && user.teamGroup) user.teamRole = String(req.body.teamRole).trim().slice(0, 80) || undefined;
         await user.save();
         res.status(200).json({ success: true, msg: 'Member updated!' });
     } catch (e) { serverError(res, e); }

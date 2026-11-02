@@ -33,6 +33,9 @@ const UserSchema = mongoose.Schema({
     isPrivate: { type: Boolean, default: false },
     showCerts: { type: Boolean, default: true },
     hiddenByAdmin: { type: Boolean, default: false },
+    // Set by an admin: shows this member on the Team page as an organizer / lead / core member
+    teamGroup: { type: String, enum: ['Organizers', 'Leads', 'Core'] },
+    teamRole: { type: String, maxlength: 80 },
     joinedOn: {
         type: Date,
         default: Date.now,

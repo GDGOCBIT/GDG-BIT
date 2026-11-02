@@ -1,6 +1,11 @@
 const TeamMember = require('../models/teamModel.js');
 const TeamOverride = require('../models/teamOverrideModel.js');
+const User = require('../models/userModel.js');
 const { getCommunityTeam } = require('./gdgCommunity.js');
+
+const GROUPS = ['Organizers', 'Leads', 'Core'];
+const DEFAULT_ROLE = { Organizers: 'GDGoC Organizer', Leads: 'Lead', Core: 'Core team' };
+const ORDER = { Organizers: 0, Leads: 50, Core: 80 };
 
 const LINKS = ['website', 'linkedin', 'github', 'twitter', 'instagram'];
 const TEXT = ['name', 'role', 'team'];
@@ -22,17 +27,30 @@ const cleanLink = (field, raw) => {
 
 // Community + local members, with any overrides applied. `admin` adds the raw override and linked account.
 const mergedTeam = async ({ admin = false } = {}) => {
-    const [local, community, overrides] = await Promise.all([
+    const [local, community, overrides, designated] = await Promise.all([
         TeamMember.find().sort({ order: 1, name: 1 }).lean(),
         getCommunityTeam(),
         TeamOverride.find().lean(),
+        User.find({ teamGroup: { $in: GROUPS }, isVerified: true }).select('firstName lastName avatar links teamGroup teamRole isPrivate hiddenByAdmin email').lean(),
     ]);
+    // accounts linked to a GDG card use that card, so they are not listed twice
+    const linkedEmails = new Set(overrides.map((o) => o.userEmail).filter(Boolean));
+    const fromMembers = designated.filter((u) => !linkedEmails.has(String(u.email || '').toLowerCase())).map((u) => ({
+        _id: `member-${u._id}`, source: 'member',
+        name: [u.firstName, u.lastName].filter(Boolean).join(' '),
+        role: u.teamRole || DEFAULT_ROLE[u.teamGroup], team: u.teamGroup, order: ORDER[u.teamGroup],
+        image: { url: u.avatar?.url || '' },
+        ...Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])),
+        memberId: u.isPrivate || u.hiddenByAdmin ? undefined : String(u._id), // link to their public page when they have one
+    }));
     const byKey = new Map(overrides.map((o) => [o.key, o]));
     const names = new Set(local.map((m) => keyOf(m.name)));
     const base = [
         ...local.map((m) => ({ ...m, source: 'local' })),
         ...community.filter((m) => !names.has(keyOf(m.name))),
     ];
+    const seen = new Set(base.map((m) => keyOf(m.name)));
+    base.push(...fromMembers.filter((m) => !seen.has(keyOf(m.name))));
     return base.map((m) => {
         const key = keyOf(m.name);
         const o = byKey.get(key);
@@ -49,4 +67,4 @@ const mergedTeam = async ({ admin = false } = {}) => {
     });
 };
 
-module.exports = { mergedTeam, cleanLink, keyOf, LINKS, TEXT };
+module.exports = { mergedTeam, cleanLink, keyOf, LINKS, TEXT, GROUPS };

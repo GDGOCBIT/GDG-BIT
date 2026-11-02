@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import useApi from '../utils/useApi'
 import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
@@ -52,6 +53,7 @@ export default function Team () {
                     <p className='font-medium leading-snug'>{m.name}</p>
                     <p className='mono text-xs text-[var(--muted)]'>{m.role}</p>
                     <div className='flex flex-wrap gap-1.5 mt-auto pt-2'>
+                      {m.memberId && <Link to={`/members/${m.memberId}`} className='pill pill-blue'>Profile</Link>}
                       <SocialLink href={m.website} label='Website' />
                       <SocialLink href={m.linkedin} label='LinkedIn' />
                       <SocialLink href={m.github} label='GitHub' />
