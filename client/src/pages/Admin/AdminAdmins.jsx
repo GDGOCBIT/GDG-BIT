@@ -60,8 +60,8 @@ export default function AdminAdmins () {
                 {a.name && <p className='text-sm text-[var(--muted)] truncate'>{a.email}</p>}
                 <span className={`pill ${tone} mt-1.5`}>{label}</span>
               </div>
-              {a.source === 'owner' ? (
-                <span className='text-xs text-[var(--muted)] max-w-[8rem] text-right'>Set in server settings</span>
+              {a.locked ? (
+                <span className='text-xs text-[var(--muted)] max-w-[8rem] text-right'>Permanent owner</span>
               ) : a.you ? null : (
                 <button className='btn btn-danger btn-sm shrink-0' onClick={() => remove(a)}>Remove</button>
               )}

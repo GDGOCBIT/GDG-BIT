@@ -46,14 +46,20 @@ const ownerEmails = () =>
         .filter(Boolean);
 
 const isOwnerEmail = (email) => ownerEmails().includes(String(email || "").toLowerCase());
+// The first email in ADMIN_EMAILS is the permanent owner: it can never be removed from the website, so the
+// site can not be locked out. Every other email in the list can be removed (and re-added) by an admin.
+const primaryOwner = () => ownerEmails()[0] || "";
 
 const userIsAdmin = async (user) => {
     if (!user) return false;
-    if (user.role === "admin" || isOwnerEmail(user.email)) return true;
     const email = String(user.email || "").toLowerCase();
+    if (email && email === primaryOwner()) return true;
+    const owner = isOwnerEmail(email);
+    if (user.role === "admin" && !owner) return true;
     if (!email) return false;
     const Settings = require("../models/settingsModel.js");
-    const doc = await Settings.findOne({ key: "site" }).select("adminEmails");
+    const doc = await Settings.findOne({ key: "site" }).select("adminEmails revokedEmails");
+    if (owner) return !(doc && doc.revokedEmails.includes(email)); // listed owner, unless removed from the website
     return !!doc && doc.adminEmails.includes(email);
 };
 
@@ -67,4 +73,4 @@ const isAdmin = async (req, res, next) => {
     }
 };
 
-module.exports = { isLoginToken, isRegisterToken, isForgotToken, isAdmin, userIsAdmin, isOwnerEmail, ownerEmails };
+module.exports = { isLoginToken, isRegisterToken, isForgotToken, isAdmin, userIsAdmin, isOwnerEmail, ownerEmails, primaryOwner };
