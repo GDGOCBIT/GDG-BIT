@@ -31,7 +31,7 @@ const mergedTeam = async ({ admin = false } = {}) => {
         TeamMember.find().sort({ order: 1, name: 1 }).lean(),
         getCommunityTeam(),
         TeamOverride.find().lean(),
-        User.find({ teamGroup: { $in: GROUPS }, isVerified: true }).select('firstName lastName avatar links teamGroup teamRole isPrivate hiddenByAdmin email').lean(),
+        User.find({ teamGroup: { $in: GROUPS }, isVerified: true }).select('firstName lastName avatar links teamGroup teamRole isPrivate hiddenByAdmin showLinks email').lean(),
     ]);
     // accounts linked to a GDG card use that card, so they are not listed twice
     const linkedEmails = new Set(overrides.map((o) => o.userEmail).filter(Boolean));
@@ -40,7 +40,7 @@ const mergedTeam = async ({ admin = false } = {}) => {
         name: [u.firstName, u.lastName].filter(Boolean).join(' '),
         role: u.teamRole || DEFAULT_ROLE[u.teamGroup], team: u.teamGroup, order: ORDER[u.teamGroup],
         image: { url: u.avatar?.url || '' },
-        ...Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])),
+        ...Object.fromEntries(LINKS.map((f) => [f, u.showLinks === false ? '' : u.links?.[f] || ''])),
         memberId: u.isPrivate || u.hiddenByAdmin ? undefined : String(u._id), // link to their public page when they have one
     }));
     const byKey = new Map(overrides.map((o) => [o.key, o]));

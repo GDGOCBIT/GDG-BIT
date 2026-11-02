@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useAuthStore } from '../store/useAuthStore'
 import { api, decrypt, formatDate } from '../utils/api'
+import SocialPills from '../components/SocialPills'
 
 const LINKS = [['website', 'Website'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['twitter', 'X / Twitter'], ['instagram', 'Instagram']]
 
@@ -44,15 +45,13 @@ function MyCertificates () {
 }
 
 /** The member's public page: bio, links, and the privacy switches. */
-function PublicPage ({ userId }) {
-  const [p, setP] = useState(null)
+function PublicPage ({ userId, p, setP }) {
   const [saving, setSaving] = useState(false)
-  useEffect(() => { api('/my/public-profile', { auth: true }).then(r => r.success && setP(r.profile)) }, [])
   if (!p) return <div className='card h-40 skeleton mt-6' />
   const save = async e => {
     e.preventDefault()
     setSaving(true)
-    const res = await api('/my/public-profile', { method: 'PUT', body: { bio: p.bio, links: p.links, isPrivate: p.isPrivate, showCerts: p.showCerts }, auth: true })
+    const res = await api('/my/public-profile', { method: 'PUT', body: { bio: p.bio, links: p.links, isPrivate: p.isPrivate, showCerts: p.showCerts, showBio: p.showBio, showLinks: p.showLinks }, auth: true })
     setSaving(false)
     if (res.success) { setP(res.profile); toast.success(res.msg) } else toast.error(res.msg)
   }
@@ -70,6 +69,8 @@ function PublicPage ({ userId }) {
       </div>
       {p.hiddenByAdmin && <p className='pill pill-live self-start'>An admin has hidden your page</p>}
       <Toggle checked={!p.isPrivate} onChange={v => setP({ ...p, isPrivate: !v })} title='List me on the Members page' text='Turn this off to make your page private. It disappears within seconds.' />
+      <Toggle checked={p.showBio} onChange={v => setP({ ...p, showBio: v })} title='Show my bio' text='Turn this off to keep your bio to yourself. You still see it here.' />
+      <Toggle checked={p.showLinks} onChange={v => setP({ ...p, showLinks: v })} title='Show my social links' text='Hides your website, GitHub, LinkedIn and the rest from your public page.' />
       <Toggle checked={p.showCerts} onChange={v => setP({ ...p, showCerts: v })} title='Show my certificates' text='Lets visitors see (and verify) the certificates issued to you.' />
       <div>
         <label className='label' htmlFor='bio'>Bio <span className='text-[var(--muted)] font-normal'>({(p.bio || '').length}/240)</span></label>
@@ -142,13 +143,17 @@ export default function Profile () {
   const [saving, setSaving] = useState(false)
   const [tab, setTab] = useState('profile')
   const [isLead, setIsLead] = useState(false)
+  const [pub, setPub] = useState(null) // this member's public-page settings (bio, links, switches)
 
   useEffect(() => {
     if (!verifyLoading && !user && !localStorage.getItem('login_token')) navigate('/auth')
   }, [verifyLoading, user, navigate])
 
   useEffect(() => {
-    if (user) api('/my/team-card', { auth: true }).then(r => setIsLead(!!r.linked))
+    if (user) {
+      api('/my/team-card', { auth: true }).then(r => setIsLead(!!r.linked))
+      api('/my/public-profile', { auth: true }).then(r => r.success && setPub(r.profile))
+    }
   }, [user?._id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -187,6 +192,13 @@ export default function Profile () {
           <p className='mono text-sm'>{'{ member }'}</p>
           <h1 className='title-1 break-words'>{user.firstName} <b>{user.lastName}</b></h1>
           <p className='text-[var(--muted)] mt-1'>Member since {formatDate(user.joinedOn)}{user.isAdmin ? ' · Admin' : ''}</p>
+          {pub?.bio && <p className='mt-3 whitespace-pre-line'>{pub.bio}{!pub.showBio && <span className='pill ml-2 align-middle'>hidden from visitors</span>}</p>}
+          {pub && Object.values(pub.links).some(Boolean) && (
+            <div className='mt-3 flex flex-wrap items-center gap-2'>
+              <SocialPills links={pub.links} />
+              {!pub.showLinks && <span className='pill'>hidden from visitors</span>}
+            </div>
+          )}
         </div>
       </div>
 
@@ -196,7 +208,7 @@ export default function Profile () {
         ))}
       </div>
 
-      {tab === 'page' && <PublicPage userId={user._id} />}
+      {tab === 'page' && (pub ? <PublicPage userId={user._id} p={pub} setP={setPub} /> : <div className='card h-40 skeleton mt-6' />)}
       {tab === 'certs' && <MyCertificates />}
       {tab === 'card' && isLead && <TeamCard />}
       {tab === 'profile' && <form onSubmit={save} className='card p-5 sm:p-8 mt-6 flex flex-col gap-5'>

@@ -32,6 +32,8 @@ const UserSchema = mongoose.Schema({
     links: { website: String, linkedin: String, github: String, twitter: String, instagram: String },
     isPrivate: { type: Boolean, default: false },
     showCerts: { type: Boolean, default: true },
+    showBio: { type: Boolean, default: true },
+    showLinks: { type: Boolean, default: true },
     hiddenByAdmin: { type: Boolean, default: false },
     // Set by an admin: shows this member on the Team page as an organizer / lead / core member
     teamGroup: { type: String, enum: ['Organizers', 'Leads', 'Core'] },

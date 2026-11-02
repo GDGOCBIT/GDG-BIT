@@ -15,7 +15,7 @@ const linksOf = (u) => Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || '
 // Never includes the email. That stays private.
 const view = (u) => ({
     _id: u._id, name: [u.firstName, u.lastName].filter(Boolean).join(' '), avatar: u.avatar?.url || '',
-    bio: u.bio || '', links: linksOf(u), joinedOn: u.joinedOn,
+    bio: u.showBio === false ? '' : u.bio || '', links: u.showLinks === false ? {} : linksOf(u), joinedOn: u.joinedOn,
 });
 
 // email -> { role, team, key } for accounts an admin linked to an organizer / lead card
@@ -46,7 +46,7 @@ const certsFor = async (email) => {
 // ---- public
 exports.list = async (req, res) => {
     try {
-        const users = await User.find(PUBLIC).select('firstName lastName avatar bio links joinedOn email showCerts teamGroup teamRole').sort({ joinedOn: -1 }).limit(500).lean();
+        const users = await User.find(PUBLIC).select('firstName lastName avatar bio links joinedOn email showCerts showBio showLinks teamGroup teamRole').sort({ joinedOn: -1 }).limit(500).lean();
         const counts = await Certificate.aggregate([{ $group: { _id: { $toLower: '$email' }, n: { $sum: 1 } } }]);
         const byEmail = new Map(counts.map((c) => [c._id, c.n]));
         const leads = await leadMap();
@@ -58,7 +58,7 @@ exports.list = async (req, res) => {
 exports.get = async (req, res) => {
     try {
         if (!isId(req.params.id)) return res.status(404).json({ success: false, msg: 'Member not found!' });
-        const u = await User.findOne({ _id: req.params.id, ...PUBLIC }).select('firstName lastName avatar bio links joinedOn email showCerts teamGroup teamRole').lean();
+        const u = await User.findOne({ _id: req.params.id, ...PUBLIC }).select('firstName lastName avatar bio links joinedOn email showCerts showBio showLinks teamGroup teamRole').lean();
         if (!u) return res.status(404).json({ success: false, msg: 'This profile is private or does not exist.' });
         const certificates = u.showCerts === false || !u.email ? [] : await certsFor(u.email);
         const lead = leadOf(u, await leadMap());
@@ -67,7 +67,7 @@ exports.get = async (req, res) => {
 };
 
 // ---- the signed-in member's own page settings
-const mine = (u) => ({ bio: u.bio || '', links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])), isPrivate: !!u.isPrivate, showCerts: u.showCerts !== false, hiddenByAdmin: !!u.hiddenByAdmin, _id: u._id });
+const mine = (u) => ({ bio: u.bio || '', links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])), isPrivate: !!u.isPrivate, showCerts: u.showCerts !== false, showBio: u.showBio !== false, showLinks: u.showLinks !== false, hiddenByAdmin: !!u.hiddenByAdmin, _id: u._id });
 
 exports.myGet = async (req, res) => res.status(200).json({ success: true, profile: mine(req.user) });
 
@@ -88,6 +88,8 @@ exports.mySave = async (req, res) => {
         if (err) return res.status(400).json({ success: false, msg: err });
         if (req.body.isPrivate !== undefined) req.user.isPrivate = !!req.body.isPrivate;
         if (req.body.showCerts !== undefined) req.user.showCerts = !!req.body.showCerts;
+        if (req.body.showBio !== undefined) req.user.showBio = !!req.body.showBio;
+        if (req.body.showLinks !== undefined) req.user.showLinks = !!req.body.showLinks;
         await req.user.save();
         res.status(200).json({ success: true, msg: req.user.isPrivate ? 'Saved. Your page is private.' : 'Saved! Your public page is up to date.', profile: mine(req.user) });
     } catch (e) { serverError(res, e); }
@@ -96,9 +98,9 @@ exports.mySave = async (req, res) => {
 // ---- admin override: hide anyone from the public pages, or fix their bio / links
 exports.adminList = async (req, res) => {
     try {
-        const users = await User.find({ isVerified: true }).select('firstName lastName email avatar bio links isPrivate showCerts hiddenByAdmin joinedOn teamGroup teamRole').sort({ joinedOn: -1 }).limit(1000).lean();
+        const users = await User.find({ isVerified: true }).select('firstName lastName email avatar bio links isPrivate showCerts showBio showLinks hiddenByAdmin joinedOn teamGroup teamRole').sort({ joinedOn: -1 }).limit(1000).lean();
         const leads = await leadMap();
-        res.status(200).json({ success: true, items: users.map((u) => ({ ...view(u), email: u.email, lead: leadOf(u, leads), teamGroup: u.teamGroup || '', teamRole: u.teamRole || '', isPrivate: !!u.isPrivate, hiddenByAdmin: !!u.hiddenByAdmin, links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])) })) });
+        res.status(200).json({ success: true, items: users.map((u) => ({ ...view(u), bio: u.bio || '', email: u.email, lead: leadOf(u, leads), teamGroup: u.teamGroup || '', teamRole: u.teamRole || '', isPrivate: !!u.isPrivate, hiddenByAdmin: !!u.hiddenByAdmin, links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])) })) });
     } catch (e) { serverError(res, e); }
 };
 
