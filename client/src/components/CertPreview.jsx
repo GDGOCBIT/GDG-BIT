@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { api, decrypt } from '../utils/api'
+import { decrypt } from '../utils/api'
 
 // The four older certificates are a fixed picture plus the name. Positions are % of the picture, text size is
 // in cqw (a share of the preview's width), so the preview looks right at any size.
