@@ -4,7 +4,6 @@ import useApi from '../utils/useApi'
 import useTitle from '../utils/useTitle'
 import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
-import SocialPills from '../components/SocialPills'
 import { formatDate } from '../utils/api'
 import { sized } from '../utils/images'
 import Img from '../components/Img'
@@ -52,10 +51,9 @@ export default function Members () {
               {m.bio
                 ? <p className='text-xs text-[var(--muted)] line-clamp-2'>{m.bio}</p>
                 : <p className='mono text-[0.7rem] text-[var(--muted)]'>Since {formatDate(m.joinedOn)}</p>}
-              <div className='flex flex-wrap justify-center items-center gap-1.5 mt-auto pt-1 relative z-20'>
-                {m.certificates > 0 && <span className='pill pill-upcoming'>{m.certificates} {m.certificates === 1 ? 'cert' : 'certs'}</span>}
-                <SocialPills links={m.links} className='justify-center' />
-              </div>
+              {m.certificates > 0 && (
+                <span className='pill pill-upcoming mt-auto'>{m.certificates} {m.certificates === 1 ? 'certificate' : 'certificates'}</span>
+              )}
             </article>
           ))}
         </div>
