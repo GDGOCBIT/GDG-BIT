@@ -20,7 +20,7 @@ A complete solution for handling everything about our **GDSC** for its members a
   projects from the [GDGOCBIT GitHub org](https://github.com/GDGOCBIT).
 - **Admin dashboard** (`/admin`) to add events, team members, projects and certificates (with CSV import).
   Admins are the emails listed in `ADMIN_EMAILS`.
-- Member accounts: email + OTP sign-up, Google / LinkedIn / X sign-in, profile editing.
+- Member accounts: email + OTP sign-up, Google / GitHub sign-in, profile editing.
 - Certificate verification with share and download options.
 
 ## Running locally

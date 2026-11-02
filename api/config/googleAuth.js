@@ -35,9 +35,10 @@ passport.use(
           return done(null, user)
         }
 
-        user = await User.findByIdAndUpdate(user._id, {
-          authType: 'login',
-        })
+        // someone who never finished sign-up still has to finish it
+        user.authType = user.isVerified ? 'login' : 'register'
+        if (!user.googleId) user.googleId = profile.id
+        await user.save()
         return done(null, user)
       } catch (error) {
         done(error, false)

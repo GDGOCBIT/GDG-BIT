@@ -7,6 +7,7 @@ import {
   useLoginStore,
   useForgotStore
 } from '../store/useAuthStore'
+import { FaGithub } from 'react-icons/fa6'
 import useSocialAuth from '../utils/useSocialAuth'
 import ThemeToggle from '../components/ThemeToggle'
 import { Arrow, BraceTag, Dots, Globe, Logo, Slashes } from '../components/Brand'
@@ -123,16 +124,15 @@ const SocialAuth = () => {
     window.location.href = socialUrl(provider)
   }
   const providers = [
-    ['google', 'Google', '/google-small.svg'],
-    ['linkedin', 'LinkedIn', '/linkedin-small.svg'],
-    ['twitter', 'X (Twitter)', '/twitter-small.svg']
+    ['google', 'Google', <img key='g' src='/google-small.svg' alt='' className='w-4 h-4' />],
+    ['github', 'GitHub', <FaGithub key='gh' className='w-4 h-4 text-[#181717]' aria-hidden='true' />]
   ]
   return (
     <div className='flex flex-col gap-2.5'>
       {providers.map(([id, label, icon]) => (
         <button key={id} type='button' onClick={() => go(id)} className='btn btn-light w-full !justify-start'>
           <span className='w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0'>
-            <img src={icon} alt='' className='w-4 h-4' />
+            {icon}
           </span>
           Continue with {label}
         </button>
