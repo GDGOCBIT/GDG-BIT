@@ -1,3 +1,5 @@
+import SocialIcon from '../../components/SocialIcon'
+import { LuArrowUpRight } from 'react-icons/lu'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { api } from '../../utils/api'
@@ -48,7 +50,7 @@ export default function AdminSettings () {
           <div key={s.key} className='card p-4 flex flex-col gap-2'>
             <label htmlFor={`s-${s.key}`} className='flex items-center gap-3'>
               <span className='w-10 h-10 rounded-full bg-white border-2 border-[var(--outline)] flex items-center justify-center shrink-0'>
-                <img src={s.icon} alt='' className='w-5 h-5 object-contain' />
+                <SocialIcon name={s.key} fallback={s.icon} className='w-5 h-5' />
               </span>
               <span className='font-medium'>{s.label}</span>
               {!urls[s.key] && <span className='pill !py-0 ml-auto'>hidden</span>}
@@ -62,7 +64,7 @@ export default function AdminSettings () {
             </div>
             {urls[s.key] && (
               <a href={/^mailto:/.test(urls[s.key]) || !/\./.test(urls[s.key]) ? undefined : (/^https?:/.test(urls[s.key]) ? urls[s.key] : `https://${urls[s.key]}`)} target='_blank' rel='noreferrer'
-                className='text-xs text-[var(--muted)] hover:underline truncate'>Test link ↗</a>
+                className='text-xs text-[var(--muted)] hover:underline truncate'>Test link <LuArrowUpRight aria-hidden='true' size={13} className='inline -mt-0.5' /></a>
             )}
           </div>
         ))}

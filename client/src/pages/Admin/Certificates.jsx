@@ -36,7 +36,7 @@ function Templates ({ templates, loading, reload }) {
             <div key={t._id} className='card flex flex-col'>
               <img src={t.image.url} alt='' loading='lazy' className='w-full aspect-[1.4] object-cover border-b-2 border-[var(--outline)] bg-[var(--sunken)]'
                 onError={e => { e.currentTarget.style.visibility = 'hidden'; e.currentTarget.nextElementSibling.hidden = false }} />
-              <p hidden className='px-4 pt-3 text-sm' style={{ color: 'var(--red)' }}>⚠ The image is missing. Open “Edit layout” and upload the blank certificate again.</p>
+              <p hidden className='px-4 pt-3 text-sm' style={{ color: 'var(--red)' }}>The image is missing. Open “Edit layout” and upload the blank certificate again.</p>
               <div className='p-4 flex flex-col gap-2 flex-1'>
                 <p className='font-medium'>{t.name}</p>
                 <p className='mono text-xs text-[var(--muted)]'>{t.fields.length} elements · {formatDate(t.createdAt)}</p>

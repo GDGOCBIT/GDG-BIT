@@ -1,3 +1,4 @@
+import { LuCheck } from 'react-icons/lu'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { api } from '../../utils/api'
@@ -157,7 +158,7 @@ export default function CertGenerator ({ templates, onGoTemplates, onIssued }) {
 
         {done && (
           <div className='band band-green p-4'>
-            <p className='font-medium'>✓ {done.count} certificates generated</p>
+            <p className='font-medium flex items-center gap-2'><LuCheck aria-hidden='true' /> {done.count} certificates generated</p>
             {done.skipped?.length > 0 && <p className='text-sm mt-1'>Skipped CSV rows without a name: {done.skipped.join(', ')}</p>}
             <p className='text-sm mt-1'>Find them any time under <b>Issued</b>.</p>
           </div>

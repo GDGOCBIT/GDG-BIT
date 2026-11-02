@@ -6,8 +6,8 @@ import { formatDate, formatTime } from '../utils/api'
 import useSettings from '../utils/useSettings'
 import { sized } from '../utils/images'
 import { Arrow, COMMUNITY_URL, Dots, Globe, Waves } from '../components/Brand'
-import { FaDiscord, FaGithub, FaInstagram, FaLinkedinIn, FaXTwitter } from 'react-icons/fa6'
 import GalleryStrip from '../components/GalleryStrip'
+import SocialIcon from '../components/SocialIcon'
 
 const sortForHome = items => {
   const rank = { live: 0, upcoming: 1, past: 2 }
@@ -147,14 +147,6 @@ function JoinBand () {
   )
 }
 
-const SOCIAL_ICONS = {
-  instagram: [FaInstagram, '#e4405f'],
-  linkedin: [FaLinkedinIn, '#0a66c2'],
-  github: [FaGithub, '#181717'],
-  discord: [FaDiscord, '#5865f2'],
-  x: [FaXTwitter, '#000000']
-}
-
 function Socials () {
   const { socials } = useSettings()
   return (
@@ -167,9 +159,7 @@ function Socials () {
         {socials.map(s => (
           <a key={s.key} href={s.url} target='_blank' rel='noreferrer' className='card lift p-4 sm:p-5 flex flex-col items-center gap-3'>
             <span className='w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border-2 border-[var(--outline)] flex items-center justify-center'>
-              {SOCIAL_ICONS[s.key]
-                ? (() => { const [Icon, color] = SOCIAL_ICONS[s.key]; return <Icon className='w-6 h-6 sm:w-7 sm:h-7' style={{ color }} aria-hidden='true' /> })()
-                : <img src={s.icon} alt='' className='w-7 h-7 sm:w-8 sm:h-8 object-contain' />}
+              <SocialIcon name={s.key} fallback={s.icon} className='w-6 h-6 sm:w-7 sm:h-7' />
             </span>
             <span className='text-sm font-medium'>{s.label}</span>
           </a>

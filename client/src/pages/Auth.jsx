@@ -7,7 +7,7 @@ import {
   useLoginStore,
   useForgotStore
 } from '../store/useAuthStore'
-import { FaGithub } from 'react-icons/fa6'
+import SocialIcon from '../components/SocialIcon'
 import useSocialAuth from '../utils/useSocialAuth'
 import ThemeToggle from '../components/ThemeToggle'
 import { Arrow, BraceTag, Dots, Globe, Logo, Slashes } from '../components/Brand'
@@ -124,8 +124,8 @@ const SocialAuth = () => {
     window.location.href = socialUrl(provider)
   }
   const providers = [
-    ['google', 'Google', <img key='g' src='/google-small.svg' alt='' className='w-4 h-4' />],
-    ['github', 'GitHub', <FaGithub key='gh' className='w-4 h-4 text-[#181717]' aria-hidden='true' />]
+    ['google', 'Google', <SocialIcon key='g' name='google' className='w-4 h-4' />],
+    ['github', 'GitHub', <SocialIcon key='gh' name='github' className='w-4 h-4' />]
   ]
   return (
     <div className='flex flex-col gap-2.5'>
