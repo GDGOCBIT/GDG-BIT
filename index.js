@@ -22,7 +22,7 @@ app.use(cors({ origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL].filte
 
 app.use(session({
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // only set a cookie when a login flow actually uses the session; a cookie on every response stops the CDN caching anything
     secret: process.env.SESSION_SECRET || process.env.JWT_SECRET
 }));
 
