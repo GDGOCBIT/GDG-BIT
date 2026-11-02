@@ -1,5 +1,6 @@
 import { formatDate, formatTime } from '../utils/api'
 import { sized } from '../utils/images'
+import Img from './Img'
 
 export const StatusPill = ({ status }) =>
   status === 'live' ? (
@@ -20,7 +21,7 @@ export default function EventCard ({ event, index = 0 }) {
     <Tag {...linkProps} className='card lift flex flex-col h-full group'>
       <div className='relative aspect-square border-b-2 border-[var(--outline)]' style={{ background: PASTELS[index % 4] }}>
         {event.image?.url ? (
-          <img src={sized(event.image.url, 640)} alt='' width='640' height='640' loading='lazy' decoding='async' className='w-full h-full object-cover' />
+          <Img src={sized(event.image.url, 640)} srcSet={`${sized(event.image.url, 320)} 320w, ${sized(event.image.url, 640)} 640w, ${sized(event.image.url, 960)} 960w`} sizes='(min-width: 1024px) 280px, (min-width: 640px) 45vw, 90vw' alt='' width='640' height='640' loading='lazy' className='w-full h-full object-cover' />
         ) : (
           <div className='w-full h-full flex items-center justify-center text-[var(--black)]'>
             <img src='/brand/gdg-mark-256.png' alt='' className='h-14' />

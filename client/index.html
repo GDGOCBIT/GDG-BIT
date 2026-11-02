@@ -13,6 +13,29 @@
       } catch (e) {}
     })();
   </script>
+  <script>
+    // Repeat visit to the home page: start loading the first hero pictures now, before any JavaScript runs.
+    (function () {
+      try {
+        if (location.pathname !== '/') return;
+        var ph = JSON.parse(localStorage.getItem('api:/gallery') || '[]');
+        var ev = JSON.parse(localStorage.getItem('api:/events') || '[]');
+        var sz = function (u, w) {
+          if (!/res\.cloudinary\.com\/[^\/]+\/image\/upload\//.test(u)) return u;
+          var m = u.match(/^(.*?\/image\/upload\/)(.*)$/), r = m[2], t = 'c_limit,w_' + w + ',f_auto,q_auto:good';
+          return /^v\d+\//.test(r) ? m[1] + t + '/' + r : m[1] + t + '/' + r.replace(/^[^\/]+\//, '');
+        };
+        var post = ev.filter(function (e) { return e.image && e.image.url; });
+        var urls = [ph[0] && ph[0].thumbUrl, post[0] && sz(post[0].image.url, 640)];
+        urls.forEach(function (u, i) {
+          if (!u) return;
+          var l = document.createElement('link');
+          l.rel = 'preload'; l.as = 'image'; l.href = u; if (i === 0) l.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(l);
+        });
+      } catch (e) {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GDG on Campus · Bengal Institute of Technology</title>
   <meta name="description"

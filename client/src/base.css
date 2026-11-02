@@ -318,6 +318,11 @@ img {
 /* Doodle arrows inside buttons take the button's text colour, so they never vanish on a dark or light fill */
 .btn .doodle { color: currentColor; }
 
+/* images fade in over their placeholder instead of popping in */
+.img-fade { opacity: 0; transition: opacity 0.3s ease; }
+.img-fade.is-in { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .img-fade { transition: none; } }
+
 /* ---------------------------------------------------------------- pills -- */
 .pill {
   display: inline-flex;

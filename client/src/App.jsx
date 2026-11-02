@@ -26,6 +26,14 @@ function App () {
   const { loadUser } = useLoginStore()
   const [idle, setIdle] = useState(false) // analytics load only after the page has settled
 
+  // Once the page has settled, quietly fetch the code of the pages people visit next.
+  useEffect(() => {
+    const warm = () => [import('./pages/Events'), import('./pages/Gallery'), import('./pages/Team'), import('./pages/Members'), import('./pages/Projects')].forEach(p => p.catch(() => {}))
+    if ('requestIdleCallback' in window) { const id = requestIdleCallback(warm, { timeout: 6000 }); return () => cancelIdleCallback(id) }
+    const t = setTimeout(warm, 4000)
+    return () => clearTimeout(t)
+  }, [])
+
   useEffect(() => {
     const go = () => setIdle(true)
     if ('requestIdleCallback' in window) { const id = requestIdleCallback(go, { timeout: 4000 }); return () => cancelIdleCallback(id) }

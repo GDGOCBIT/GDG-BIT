@@ -4,6 +4,7 @@ import Lightbox from './Lightbox'
 import { LuArrowLeft, LuArrowRight, LuPause, LuPlay } from 'react-icons/lu'
 import { Arrow } from './Brand'
 import useGallery from '../utils/useGallery'
+import Img from './Img'
 
 const TILT = [-3, 2, -1.5, 3, -2, 1.5]
 
@@ -110,8 +111,8 @@ export default function GalleryStrip () {
           {(loading ? Array.from({ length: 8 }) : loop).map((it, i) => (
             it ? (
               <button key={i} onClick={() => setOpen(i % strip.length)} aria-label={`Open ${it.title}`}
-                className='card lift shrink-0 w-52 sm:w-64 aspect-[4/5] !overflow-hidden' style={{ transform: `rotate(${TILT[i % TILT.length]}deg)` }}>
-                <img src={it.thumb} alt={it.title} loading='lazy' className='w-full h-full object-cover' draggable={false} />
+                className='card lift bg-[var(--sunken)] shrink-0 w-52 sm:w-64 aspect-[4/5] !overflow-hidden' style={{ transform: `rotate(${TILT[i % TILT.length]}deg)` }}>
+                <Img src={it.thumb} srcSet={it.srcSet} sizes='(min-width: 640px) 256px, 208px' alt={it.title} loading='lazy' className='w-full h-full object-cover' draggable={false} />
               </button>
             ) : <div key={i} className='card skeleton shrink-0 w-52 sm:w-64 aspect-[4/5]' />
           ))}

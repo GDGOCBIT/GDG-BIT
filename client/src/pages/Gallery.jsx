@@ -3,6 +3,7 @@ import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/EmptyState'
 import Lightbox from '../components/Lightbox'
 import useGallery from '../utils/useGallery'
+import Img from '../components/Img'
 
 export default function Gallery () {
   const { items, photoCount, loading, error } = useGallery()
@@ -35,8 +36,8 @@ export default function Gallery () {
           <div className='columns-2 md:columns-3 lg:columns-4 gap-3 sm:gap-4'>
             {shown.map((it, i) => (
               <button key={it.id} onClick={() => setOpen(i)} aria-label={`Open ${it.title}`}
-                className='card lift block w-full mb-3 sm:mb-4 break-inside-avoid text-left group relative'>
-                <img src={it.thumb} alt={it.title} loading='lazy' className='w-full h-auto block' style={it.w && it.h ? { aspectRatio: `${it.w} / ${it.h}` } : undefined} />
+                className='card lift block w-full bg-[var(--sunken)] mb-3 sm:mb-4 break-inside-avoid text-left group relative'>
+                <Img src={it.thumb} srcSet={it.srcSet} sizes='(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw' alt={it.title} loading='lazy' className='w-full h-auto block' style={it.w && it.h ? { aspectRatio: `${it.w} / ${it.h}` } : undefined} />
                 <span className='absolute inset-x-0 bottom-0 p-3 pt-10 text-sm text-white bg-gradient-to-t from-black/75 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity line-clamp-2'>
                   {it.title}
                 </span>
