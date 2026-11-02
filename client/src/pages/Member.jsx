@@ -6,6 +6,7 @@ import useTitle from '../utils/useTitle'
 import { sized } from '../utils/images'
 import EmptyState from '../components/EmptyState'
 import SocialPills from '../components/SocialPills'
+import CertPreview from '../components/CertPreview'
 
 const TONES = ['var(--blue-pa)', 'var(--green-pa)', 'var(--yellow-pa)', 'var(--red-pa)']
 
@@ -32,7 +33,7 @@ export default function Member () {
     return (
       <div className='wrap page-top max-w-3xl'>
         <EmptyState title='Profile not available' text={state.error || 'This profile is private or does not exist.'} tone='red'>
-          <Link to='/members' className='btn btn-ink btn-sm'>All members</Link>
+          <Link to='/' className='btn btn-ink btn-sm'>Go home</Link>
         </EmptyState>
       </div>
     )
@@ -64,9 +65,12 @@ export default function Member () {
             : (
               <div className='grid sm:grid-cols-2 gap-4 mt-5'>
                 {m.certificates.map((c, i) => (
-                  <Link key={c._id} to={`/cert/verify/${c._id}`} className='card lift p-5 flex flex-col gap-2' style={{ background: TONES[i % 4], color: 'var(--black)' }}>
-                    <span className='mono text-xs'>{formatDate(c.createdAt)} · verified</span>
-                    <span className='text-lg font-medium leading-snug'>{c.title}</span>
+                  <Link key={c._id} to={`/cert/verify/${c._id}`} className='card lift flex flex-col' style={{ background: TONES[i % 4], color: 'var(--black)' }}>
+                    <CertPreview id={c._id} className='border-b-2 border-[var(--black)]' />
+                    <div className='p-4 flex flex-col gap-1'>
+                      <span className='mono text-xs'>{c.createdAt ? `${formatDate(c.createdAt)} · ` : ''}Verified</span>
+                      <span className='text-lg font-medium leading-snug'>{c.title}</span>
+                    </div>
                   </Link>
                 ))}
               </div>

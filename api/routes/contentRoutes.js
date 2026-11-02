@@ -27,7 +27,6 @@ router.get("/projects", listProjects);
 router.get("/cert-templates/:id/image", templateImage);
 router.get("/settings", settings.publicSettings);
 router.get("/gallery", gallery.list);
-router.get("/members", members.list);
 router.get("/members/:id", members.get);
 router.get("/gallery/:id/image", gallery.image);
 

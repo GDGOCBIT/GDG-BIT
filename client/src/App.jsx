@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Container from './components/Container'
 import Home from './pages/Home'
 import Redirect from './pages/Redirect'
@@ -9,7 +9,6 @@ const Auth = lazy(() => import('./pages/Auth'))
 const Events = lazy(() => import('./pages/Events'))
 const Archive = lazy(() => import('./pages/Archive'))
 const Team = lazy(() => import('./pages/Team'))
-const Members = lazy(() => import('./pages/Members'))
 const Member = lazy(() => import('./pages/Member'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Projects = lazy(() => import('./pages/Projects'))
@@ -28,7 +27,7 @@ function App () {
 
   // Once the page has settled, quietly fetch the code of the pages people visit next.
   useEffect(() => {
-    const warm = () => [import('./pages/Events'), import('./pages/Gallery'), import('./pages/Team'), import('./pages/Members'), import('./pages/Projects')].forEach(p => p.catch(() => {}))
+    const warm = () => [import('./pages/Events'), import('./pages/Gallery'), import('./pages/Team'), import('./pages/Projects')].forEach(p => p.catch(() => {}))
     if ('requestIdleCallback' in window) { const id = requestIdleCallback(warm, { timeout: 6000 }); return () => cancelIdleCallback(id) }
     const t = setTimeout(warm, 4000)
     return () => clearTimeout(t)
@@ -59,7 +58,7 @@ function App () {
         <Route path='/archive' element={<Archive />} />
         <Route path='/gallery' element={<Gallery />} />
         <Route path='/team' element={<Team />} />
-        <Route path='/members' element={<Members />} />
+        <Route path='/members' element={<Navigate to='/' replace />} />
         <Route path='/members/:id' element={<Member />} />
         <Route path='/projects' element={<Projects />} />
         <Route path='/profile' element={<Profile />} />

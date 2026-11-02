@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useAuthStore } from '../store/useAuthStore'
 import { api, decrypt, formatDate } from '../utils/api'
 import SocialPills from '../components/SocialPills'
+import CertPreview from '../components/CertPreview'
 
 const LINKS = [['website', 'Website'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['twitter', 'X / Twitter'], ['instagram', 'Instagram']]
 
@@ -29,8 +30,9 @@ function MyCertificates () {
   return (
     <div className='grid sm:grid-cols-2 gap-4 mt-6'>
       {state.items.map((c, i) => (
-        <article key={c._id} className='card lift p-5 flex flex-col gap-3' style={{ background: ['var(--blue-pa)', 'var(--green-pa)', 'var(--yellow-pa)', 'var(--red-pa)'][i % 4], color: 'var(--black)' }}>
-          <p className='mono text-xs'>{formatDate(c.createdAt)}</p>
+        <article key={c._id} className='card lift flex flex-col gap-3 pb-5' style={{ background: ['var(--blue-pa)', 'var(--green-pa)', 'var(--yellow-pa)', 'var(--red-pa)'][i % 4], color: 'var(--black)' }}>
+          <CertPreview id={c._id} className='border-b-2 border-[var(--black)]' />
+          <p className='mono text-xs px-5'>{c.createdAt ? formatDate(c.createdAt) : 'Issued'}</p>
           <h3 className='text-lg font-medium leading-snug'>{c.title}</h3>
           {c.appreciation && <p className='text-sm line-clamp-2'>{c.appreciation}</p>}
           <p className='mono text-xs break-all'>ID · {c._id}</p>
@@ -65,10 +67,10 @@ function PublicPage ({ userId, p, setP }) {
     <form onSubmit={save} className='card p-5 sm:p-8 mt-6 flex flex-col gap-5'>
       <div>
         <h2 className='text-xl font-medium'>Your public page</h2>
-        <p className='text-sm text-[var(--muted)] mt-1'>Shown on the Members page with your name and photo. Your email is never shown.</p>
+        <p className='text-sm text-[var(--muted)] mt-1'>A page you can share: your name, photo, bio, links and certificates. It is not listed on the site, and your email is never shown.</p>
       </div>
       {p.hiddenByAdmin && <p className='pill pill-live self-start'>An admin has hidden your page</p>}
-      <Toggle checked={!p.isPrivate} onChange={v => setP({ ...p, isPrivate: !v })} title='List me on the Members page' text='Turn this off to make your page private. It disappears within seconds.' />
+      <Toggle checked={!p.isPrivate} onChange={v => setP({ ...p, isPrivate: !v })} title='Let people open my page with my link' text='Your page is not listed anywhere: only people you share the link with can see it. Turn this off to make it private (it stops working within seconds).' />
       <Toggle checked={p.showBio} onChange={v => setP({ ...p, showBio: v })} title='Show my bio' text='Turn this off to keep your bio to yourself. You still see it here.' />
       <Toggle checked={p.showLinks} onChange={v => setP({ ...p, showLinks: v })} title='Show my social links' text='Hides your website, GitHub, LinkedIn and the rest from your public page.' />
       <Toggle checked={p.showCerts} onChange={v => setP({ ...p, showCerts: v })} title='Show my certificates' text='Lets visitors see (and verify) the certificates issued to you.' />
@@ -87,6 +89,7 @@ function PublicPage ({ userId, p, setP }) {
       <div className='flex flex-wrap gap-3'>
         <button className='btn btn-ink' disabled={saving}>{saving ? 'Saving…' : 'Save page'}</button>
         {!p.isPrivate && !p.hiddenByAdmin && <Link to={`/members/${userId}`} className='btn btn-ghost'>View my page</Link>}
+        {!p.isPrivate && !p.hiddenByAdmin && <button type='button' className='btn btn-ghost' onClick={async () => { try { await navigator.clipboard.writeText(`${location.origin}/members/${userId}`); toast.success('Link copied!') } catch { toast.error('Could not copy the link') } }}>Copy my link</button>}
       </div>
     </form>
   )
