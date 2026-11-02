@@ -43,7 +43,7 @@ export default function Member () {
       <div className='band band-blue px-6 py-8 sm:px-10 flex flex-col sm:flex-row sm:items-center gap-5'>
         <img src={sized(m.avatar, 400) || '/user.svg'} alt='' className='w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-[var(--black)] bg-white' />
         <div className='min-w-0 flex-1'>
-          <p className='mono text-sm'>{'{ member }'}</p>
+          <p className='mono text-sm flex flex-wrap items-center gap-2'>{'{ member }'}{m.lead && <Link to='/team' className='pill pill-yellow'>{m.lead.role}</Link>}</p>
           <h1 className='title-1 break-words'>{m.name}</h1>
           <p className='text-[var(--muted)] mt-1'>Member since {formatDate(m.joinedOn)}</p>
         </div>

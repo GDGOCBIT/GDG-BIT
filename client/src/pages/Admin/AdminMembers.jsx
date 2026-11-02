@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import useApi from '../../utils/useApi'
+import { LuTrash2 } from 'react-icons/lu'
 import { api, formatDate } from '../../utils/api'
 
 const LINKS = [['website', 'Website'], ['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['twitter', 'X / Twitter'], ['instagram', 'Instagram']]
@@ -13,18 +14,42 @@ export default function AdminMembers () {
   const [form, setForm] = useState({})
   const [saving, setSaving] = useState(false)
 
+  const [team, setTeam] = useState([])
+  const [cardKey, setCardKey] = useState('') // team card chosen for the member being edited
+  useEffect(() => {
+    if (!editing) return
+    setCardKey(editing.lead?.key || '')
+    api('/admin/team?fresh=1', { auth: true }).then(r => r.success && setTeam(r.items))
+  }, [editing])
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '')
+  const suggestion = editing && !editing.lead && team.find(t => norm(t.name) === norm(editing.name))
+
   const shown = items.filter(m => !q || `${m.name} ${m.email}`.toLowerCase().includes(q.toLowerCase()))
   const open = m => { setForm({ bio: m.bio, links: { ...m.links }, hiddenByAdmin: m.hiddenByAdmin }); setEditing(m) }
   const save = async e => {
     e.preventDefault()
     setSaving(true)
     const res = await api(`/admin/members/${editing._id}`, { method: 'PUT', body: form, auth: true })
+    // organizer / lead link: unlink the old card, link the chosen one
+    if (res.success && cardKey !== (editing.lead?.key || '')) {
+      if (editing.lead) await api(`/admin/team/${encodeURIComponent(editing.lead.key)}`, { method: 'PUT', body: { userEmail: '' }, auth: true })
+      if (cardKey) {
+        const r2 = await api(`/admin/team/${encodeURIComponent(cardKey)}`, { method: 'PUT', body: { userEmail: editing.email }, auth: true })
+        if (!r2.success) toast.error(r2.msg)
+      }
+    }
     setSaving(false)
     if (res.success) { toast.success(res.msg); setEditing(null); reload() } else toast.error(res.msg)
   }
   const toggle = async m => {
     const res = await api(`/admin/members/${m._id}`, { method: 'PUT', body: { hiddenByAdmin: !m.hiddenByAdmin }, auth: true })
     if (res.success) { toast.success(m.hiddenByAdmin ? 'Page is visible again' : 'Page hidden'); reload() } else toast.error(res.msg)
+  }
+
+  const remove = async m => {
+    if (!window.confirm(`Delete ${m.name} (${m.email}) for good?\n\nTheir account, photo and public page are removed. Certificates issued to this email stay valid.`)) return
+    const res = await api(`/admin/members/${m._id}`, { method: 'DELETE', auth: true })
+    if (res.success) { toast.success(res.msg); reload() } else toast.error(res.msg)
   }
 
   return (
@@ -39,7 +64,7 @@ export default function AdminMembers () {
       {!!shown.length && (
         <div className='card overflow-x-auto'>
           <table className='table'>
-            <thead><tr><th /><th>Name</th><th>Email</th><th>Joined</th><th>Page</th><th /></tr></thead>
+            <thead><tr><th /><th>Name</th><th>Email</th><th>Joined</th><th>Page</th><th>Team</th><th /></tr></thead>
             <tbody>
               {shown.map(m => (
                 <tr key={m._id}>
@@ -48,9 +73,11 @@ export default function AdminMembers () {
                   <td>{m.email}</td>
                   <td>{formatDate(m.joinedOn)}</td>
                   <td>{m.hiddenByAdmin ? <span className='pill pill-live'>hidden by admin</span> : m.isPrivate ? <span className='pill'>private</span> : <span className='pill pill-upcoming'>public</span>}</td>
+                  <td>{m.lead ? <span className='pill pill-yellow'>{m.lead.role}</span> : '—'}</td>
                   <td className='whitespace-nowrap text-right'>
                     <button className='btn btn-ghost btn-sm mr-2' onClick={() => open(m)}>Edit</button>
-                    <button className='btn btn-ghost btn-sm' onClick={() => toggle(m)}>{m.hiddenByAdmin ? 'Unhide' : 'Hide'}</button>
+                    <button className='btn btn-ghost btn-sm mr-2' onClick={() => toggle(m)}>{m.hiddenByAdmin ? 'Unhide' : 'Hide'}</button>
+                    <button className='btn btn-danger btn-sm btn-icon !w-9' aria-label={`Delete ${m.name}`} title='Delete member' onClick={() => remove(m)}><LuTrash2 aria-hidden='true' size={16} /></button>
                   </td>
                 </tr>
               ))}
@@ -72,6 +99,17 @@ export default function AdminMembers () {
                 <input id={`am-${k}`} className='field' value={form.links[k] || ''} onChange={e => setForm({ ...form, links: { ...form.links, [k]: e.target.value } })} />
               </div>
             ))}
+            <div>
+              <label className='label' htmlFor='am-card'>Organizer / lead card</label>
+              <select id='am-card' className='field' value={cardKey} onChange={e => setCardKey(e.target.value)}>
+                <option value=''>Not an organizer</option>
+                {team.map(t => <option key={t.key} value={t.key} disabled={!!t.userEmail && t.userEmail !== editing.email}>{t.name} · {t.role}{t.userEmail && t.userEmail !== editing.email ? ' (linked)' : ''}</option>)}
+              </select>
+              {suggestion && !cardKey && (
+                <button type='button' className='text-sm text-[var(--accent)] hover:underline mt-1' onClick={() => setCardKey(suggestion.key)}>Looks like {suggestion.name} ({suggestion.role}). Link them?</button>
+              )}
+              <p className='text-xs text-[var(--muted)] mt-1'>Linked accounts get an organizer badge, and can edit their own team links from their profile.</p>
+            </div>
             <label className='flex items-center gap-3 cursor-pointer'>
               <input type='checkbox' className='w-5 h-5 accent-[var(--red)]' checked={!!form.hiddenByAdmin} onChange={e => setForm({ ...form, hiddenByAdmin: e.target.checked })} />
               <span>Hide this page from the public Members list</span>

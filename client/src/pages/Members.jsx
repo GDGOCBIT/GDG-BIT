@@ -49,6 +49,7 @@ export default function Members () {
                 <p className='font-medium leading-snug'>{m.name}</p>
                 {m.bio ? <p className='text-sm text-[var(--muted)] line-clamp-2'>{m.bio}</p> : <p className='mono text-xs text-[var(--muted)]'>Member since {formatDate(m.joinedOn)}</p>}
                 <div className='flex flex-wrap items-center gap-1.5 mt-auto pt-2 relative z-20'>
+                  {m.lead && <span className='pill pill-yellow'>{m.lead.role}</span>}
                   {m.certificates > 0 && <span className='pill pill-upcoming'>{m.certificates} {m.certificates === 1 ? 'certificate' : 'certificates'}</span>}
                   <SocialPills links={m.links} />
                 </div>

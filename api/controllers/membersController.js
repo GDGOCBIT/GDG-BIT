@@ -1,8 +1,10 @@
 const User = require('../models/userModel.js');
 const Certificate = require('../models/certModel.js');
 const CertTemplate = require('../models/certTemplateModel.js');
-const { cleanLink, LINKS } = require('../services/team.js');
-const { serverError } = require('../utils/crudFactory.js');
+const TeamOverride = require('../models/teamOverrideModel.js');
+const { cleanLink, LINKS, mergedTeam } = require('../services/team.js');
+const { serverError, removeImage } = require('../utils/crudFactory.js');
+const { userIsAdmin } = require('../middleware/auth.js');
 
 const LABELS = { website: 'Website', linkedin: 'LinkedIn', github: 'GitHub', twitter: 'X', instagram: 'Instagram' };
 const PUBLIC = { isVerified: true, isPrivate: { $ne: true }, hiddenByAdmin: { $ne: true }, firstName: { $exists: true, $ne: '' } };
@@ -15,6 +17,18 @@ const view = (u) => ({
     _id: u._id, name: [u.firstName, u.lastName].filter(Boolean).join(' '), avatar: u.avatar?.url || '',
     bio: u.bio || '', links: linksOf(u), joinedOn: u.joinedOn,
 });
+
+// email -> { role, team, key } for accounts an admin linked to an organizer / lead card
+const leadMap = async () => {
+    const linked = await TeamOverride.find({ userEmail: { $exists: true, $ne: '' } }).select('key userEmail').lean();
+    if (!linked.length) return new Map();
+    const team = await mergedTeam();
+    const byKey = new Map(team.map((m) => [m.key, m]));
+    return new Map(linked.filter((o) => byKey.has(o.key)).map((o) => {
+        const m = byKey.get(o.key);
+        return [o.userEmail, { key: o.key, role: m.role, team: m.team }];
+    }));
+};
 
 const certsFor = async (email) => {
     const certs = await Certificate.find({ email: new RegExp(`^${escapeRegex(email)}$`, 'i') })
@@ -31,7 +45,8 @@ exports.list = async (req, res) => {
         const users = await User.find(PUBLIC).select('firstName lastName avatar bio links joinedOn email showCerts').sort({ joinedOn: -1 }).limit(500).lean();
         const counts = await Certificate.aggregate([{ $group: { _id: { $toLower: '$email' }, n: { $sum: 1 } } }]);
         const byEmail = new Map(counts.map((c) => [c._id, c.n]));
-        const items = users.map((u) => ({ ...view(u), certificates: u.showCerts === false ? 0 : byEmail.get(String(u.email || '').toLowerCase()) || 0 }));
+        const leads = await leadMap();
+        const items = users.map((u) => ({ ...view(u), lead: leads.get(String(u.email || '').toLowerCase()) || null, certificates: u.showCerts === false ? 0 : byEmail.get(String(u.email || '').toLowerCase()) || 0 }));
         res.status(200).json({ success: true, items });
     } catch (e) { serverError(res, e); }
 };
@@ -42,7 +57,8 @@ exports.get = async (req, res) => {
         const u = await User.findOne({ _id: req.params.id, ...PUBLIC }).select('firstName lastName avatar bio links joinedOn email showCerts').lean();
         if (!u) return res.status(404).json({ success: false, msg: 'This profile is private or does not exist.' });
         const certificates = u.showCerts === false || !u.email ? [] : await certsFor(u.email);
-        res.status(200).json({ success: true, member: { ...view(u), certificates, certsHidden: u.showCerts === false } });
+        const lead = (await leadMap()).get(String(u.email || '').toLowerCase()) || null;
+        res.status(200).json({ success: true, member: { ...view(u), lead, certificates, certsHidden: u.showCerts === false } });
     } catch (e) { serverError(res, e); }
 };
 
@@ -77,7 +93,8 @@ exports.mySave = async (req, res) => {
 exports.adminList = async (req, res) => {
     try {
         const users = await User.find({ isVerified: true }).select('firstName lastName email avatar bio links isPrivate showCerts hiddenByAdmin joinedOn').sort({ joinedOn: -1 }).limit(1000).lean();
-        res.status(200).json({ success: true, items: users.map((u) => ({ ...view(u), email: u.email, isPrivate: !!u.isPrivate, hiddenByAdmin: !!u.hiddenByAdmin, links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])) })) });
+        const leads = await leadMap();
+        res.status(200).json({ success: true, items: users.map((u) => ({ ...view(u), email: u.email, lead: leads.get(String(u.email || '').toLowerCase()) || null, isPrivate: !!u.isPrivate, hiddenByAdmin: !!u.hiddenByAdmin, links: Object.fromEntries(LINKS.map((f) => [f, u.links?.[f] || ''])) })) });
     } catch (e) { serverError(res, e); }
 };
 
@@ -91,5 +108,21 @@ exports.adminSave = async (req, res) => {
         if (req.body.hiddenByAdmin !== undefined) user.hiddenByAdmin = !!req.body.hiddenByAdmin;
         await user.save();
         res.status(200).json({ success: true, msg: 'Member updated!' });
+    } catch (e) { serverError(res, e); }
+};
+
+// Deletes an account for good. Certificates already issued to the email are kept (they are records, and
+// the verify links must keep working). Admins have to be demoted first, and you cannot delete yourself.
+exports.adminRemove = async (req, res) => {
+    try {
+        if (!isId(req.params.id)) return res.status(404).json({ success: false, msg: 'Member not found!' });
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ success: false, msg: 'Member not found!' });
+        if (String(user._id) === String(req.user._id)) return res.status(400).json({ success: false, msg: 'You cannot delete your own account here.' });
+        if (await userIsAdmin(user)) return res.status(400).json({ success: false, msg: 'This person is an admin. Remove their admin access first.' });
+        await removeImage(user.avatar);
+        if (user.email) await TeamOverride.updateMany({ userEmail: user.email.toLowerCase() }, { $unset: { userEmail: '' } });
+        await user.deleteOne();
+        res.status(200).json({ success: true, msg: 'Member deleted.' });
     } catch (e) { serverError(res, e); }
 };

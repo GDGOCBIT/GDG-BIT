@@ -28,6 +28,7 @@ router.delete("/admin/team/:key", team.adminReset);
 
 router.get("/admin/members", members.adminList);
 router.put("/admin/members/:id", members.adminSave);
+router.delete("/admin/members/:id", members.adminRemove);
 
 router.get("/admin/certs", c.listCerts);
 router.post("/admin/certs", c.createCert);
