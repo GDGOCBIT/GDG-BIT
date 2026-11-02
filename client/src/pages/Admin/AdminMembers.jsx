@@ -71,7 +71,7 @@ export default function AdminMembers () {
       {loading && <p className='text-[var(--muted)]'>Loading…</p>}
       {error && <p className='text-[var(--red)]'>{error}</p>}
       {!!shown.length && (
-        <div className='card overflow-x-auto'>
+        <div className='card table-wrap'>
           <table className='table'>
             <thead><tr><th /><th>Name</th><th>Email</th><th>Joined</th><th>Page</th><th>Team</th><th /></tr></thead>
             <tbody>

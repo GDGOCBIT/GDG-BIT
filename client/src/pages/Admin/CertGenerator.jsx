@@ -173,7 +173,7 @@ export default function CertGenerator ({ templates, onGoTemplates, onIssued }) {
           <canvas ref={previewRef} className='w-full h-auto block rounded-lg bg-white' />
         </div>
         {rows.length > 0 && (
-          <div className='card overflow-x-auto'>
+          <div className='card table-wrap'>
             <table className='table'>
               <thead><tr>{csv.headers.map(h => <th key={h}>{h}</th>)}</tr></thead>
               <tbody>

@@ -105,7 +105,7 @@ export default function ResourceManager ({ config, extra }) {
       )}
 
       {!!items.length && (
-        <div className='card overflow-x-auto'>
+        <div className='card table-wrap'>
           <table className='table'>
             <thead>
               <tr>

@@ -487,6 +487,15 @@ textarea.field {
   overflow: hidden;
 }
 
+/* Tables scroll sideways on phones. .card sets overflow:hidden, which used to win over a scroll utility class. */
+.card.table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.table-wrap .table { min-width: 44rem; }
+
 /* Admin table */
 .table {
   width: 100%;

@@ -51,7 +51,7 @@ export default function AdminTeam () {
       {loading && <p className='text-[var(--muted)]'>Loading…</p>}
       {error && <p className='text-[var(--red)]'>{error}</p>}
       {!!shown.length && (
-        <div className='card overflow-x-auto'>
+        <div className='card table-wrap'>
           <table className='table'>
             <thead><tr><th /><th>Name</th><th>Role</th><th>Links</th><th>Linked account</th><th /></tr></thead>
             <tbody>

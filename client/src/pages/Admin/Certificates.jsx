@@ -84,7 +84,7 @@ function Issued ({ templates, refreshKey }) {
       {error && <p className='text-[var(--red)]'>{error}</p>}
       {!loading && !error && !items.length && <EmptyState title={q ? 'No match' : 'Nothing issued yet'} />}
       {!!items.length && (
-        <div className='card overflow-x-auto'>
+        <div className='card table-wrap'>
           <table className='table'>
             <thead><tr><th>Name</th><th>Template</th><th>ID</th><th>Issued</th><th /></tr></thead>
             <tbody>
